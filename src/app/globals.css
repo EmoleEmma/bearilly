@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* ── Brand tokens ── */
+:root {
+  --color-primary: #1E3A5F;
+  --color-primary-light: #2E75B6;
+  --color-accent: #F0A500;
+  --color-success: #22C55E;
+  --color-danger: #EF4444;
+  --color-bg: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-text: #1E293B;
+  --color-text-muted: #64748B;
+}
+
+/* ── Tailwind v4: register custom utilities so classes like
+      bg-primary, text-primary, border-border, text-muted work ── */
+@theme {
+  --color-primary: #1E3A5F;
+  --color-primary-light: #2E75B6;
+  --color-primary-50: #EFF6FF;
+  --color-accent: #F0A500;
+  --color-success: #22C55E;
+  --color-danger: #EF4444;
+  --color-border: #E2E8F0;
+  --color-muted: #64748B;
+  --color-surface: #FFFFFF;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+/* PWA safe areas */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
