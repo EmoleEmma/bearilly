@@ -125,6 +125,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [redirectTo, setRedirectTo] = useState('')
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -134,8 +135,8 @@ export default function RegisterPage() {
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
     setError('')
+    setRedirectTo('')
   }
-
   async function handleRegister() {
     if (!form.fullName || !form.email || !form.password) {
       setError('Please fill in all fields')
@@ -164,6 +165,9 @@ export default function RegisterPage() {
 
       if (data.error) {
         setError(data.error)
+        if (data.redirectTo) {
+          setRedirectTo(data.redirectTo)
+        }
       } else {
         router.push(`/payment?email=${encodeURIComponent(form.email)}`)
       }
@@ -215,6 +219,17 @@ export default function RegisterPage() {
         {error && (
           <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">
             {error}
+            {redirectTo && (
+              <>
+                {' '}
+                <Link
+                  href={`${redirectTo}?email=${encodeURIComponent(form.email)}`}
+                  className="font-semibold underline"
+                >
+                  Go to Payment →
+                </Link>
+              </>
+            )}
           </p>
         )}
 

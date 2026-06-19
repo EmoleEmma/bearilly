@@ -36,6 +36,28 @@ export async function POST(request: Request) {
         authError.message.toLowerCase().includes('already been registered') ||
         authError.message.toLowerCase().includes('already exists')
       ) {
+        // Check whether this existing account was ever activated.
+        // If not, the person abandoned before paying — send them to
+        // payment instead of telling them to log in (they can't get past
+        // login anyway since middleware blocks unactivated users).
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('is_activated, email')
+          .eq('email', email)
+          .maybeSingle()
+
+        if (existingProfile && !existingProfile.is_activated) {
+          return NextResponse.json(
+            {
+              error:
+                'You already started registration but have not completed payment yet. Please proceed to payment to activate your account.',
+              redirectTo: '/payment',
+              email,
+            },
+            { status: 409 }
+          )
+        }
+
         return NextResponse.json(
           {
             error:
