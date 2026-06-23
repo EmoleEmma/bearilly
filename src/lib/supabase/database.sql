@@ -211,3 +211,37 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- ── quiz_results ───────────────────────────────────────────────
+-- Stores each quiz attempt by a user for a category
+create table if not exists public.quiz_results (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references public.profiles(id) on delete cascade,
+  category        text not null,
+  score           int  not null default 0,
+  total           int  not null default 100,
+  passed          boolean not null default false,
+  attempt_number  int  not null default 1,
+  taken_at        timestamptz not null default now()
+);
+
+alter table public.quiz_results enable row level security;
+
+-- Users can read and insert their own quiz results
+create policy "quiz_results: own rows read"
+  on public.quiz_results for select
+  using (auth.uid() = user_id);
+
+create policy "quiz_results: own rows insert"
+  on public.quiz_results for insert
+  with check (auth.uid() = user_id);
+
+-- Admins can read all quiz results (via service role or admin policy)
+create policy "quiz_results: admin read all"
+  on public.quiz_results for select
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );

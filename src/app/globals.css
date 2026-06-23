@@ -1,37 +1,87 @@
 @import "tailwindcss";
 
-/* ── Brand tokens ── */
+body {
+  background-color: #FAF7F2;
+  color: #334155;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Design System Tokens ── */
 :root {
-  --color-primary: #1E3A5F;
-  --color-primary-light: #2E75B6;
-  --color-accent: #F0A500;
-  --color-success: #22C55E;
-  --color-danger: #EF4444;
-  --color-bg: #F8FAFC;
-  --color-surface: #FFFFFF;
-  --color-border: #E2E8F0;
-  --color-text: #1E293B;
-  --color-text-muted: #64748B;
+  /* Admin Environment Tokens */
+  --admin-slate: #334155;
+  --admin-deep-slate: #1E293B;
+  --admin-teal: #4F7C82;
+  --admin-soft-gray: #EEF1F4;
+
+  /* User Environment Tokens */
+  --user-warm-cream: #F8F5EF;
+  --user-soft-cream: #FAF7F2;
+  --user-warm-gold: #C89B5A;
+  --user-light-gold: #E7C997;
 }
 
-/* ── Tailwind v4: register custom utilities so classes like
-      bg-primary, text-primary, border-border, text-muted work ── */
 @theme {
-  --color-primary: #1E3A5F;
-  --color-primary-light: #2E75B6;
-  --color-primary-50: #EFF6FF;
-  --color-accent: #F0A500;
-  --color-success: #22C55E;
-  --color-danger: #EF4444;
-  --color-border: #E2E8F0;
-  --color-muted: #64748B;
-  --color-surface: #FFFFFF;
+  /* Admin Design System Utilities */
+  --color-admin-slate: #334155;
+  --color-admin-deep: #1E293B;
+  --color-admin-teal: #4F7C82;
+  --color-admin-gray: #EEF1F4;
+
+  /* User/Learning Design System Utilities */
+  --color-user-cream: #F8F5EF;
+  --color-user-soft: #FAF7F2;
+  --color-user-gold: #C89B5A;
+  --color-user-lightgold: #E7C997;
+  
+  /* Generic helpers matching UI specification overrides */
+  --color-border: #EEF1F4;
+  --color-surface-white: #FFFFFF;
+
+  /* Full design system — admin theme */
+  --color-admin-bg: #0F172A;
+  --color-admin-surface: #1E293B;
+  --color-admin-card: #334155;
+  --color-admin-accent: #4F7C82;
+  --color-admin-accent2: #0D9488;
+  --color-admin-border: #475569;
+  --color-admin-text: #F1F5F9;
+  --color-admin-muted: #94A3B8;
+  --color-admin-success: #10B981;
+  --color-admin-danger: #EF4444;
+  --color-admin-warning: #F59E0B;
+
+  /* Full design system — user/public theme */
+  --color-user-bg: #F8F5EF;
+  --color-user-surface: #FAF7F2;
+  --color-user-card: #FFFFFF;
+  --color-user-accent: #C89B5A;
+  --color-user-accent2: #E7C997;
+  --color-user-teal: #4F7C82;
+  --color-user-dark: #1E293B;
+  --color-user-border: #E8E0D0;
+  --color-user-text: #2D2416;
+  --color-user-muted: #8B7355;
 }
 
-* {
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200,155,90,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(200,155,90,0); }
+}
+.animate-fadeIn { animation: fadeIn 0.4s ease-in-out; }
+.animate-slideUp { animation: slideUp 0.4s ease-in-out; }
+.animate-pulse-gold { animation: pulse-gold 2s infinite; }
+
+*, *::before, *::after {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 html,

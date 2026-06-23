@@ -4,16 +4,19 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { ArrowLeft, BookOpen, Lightbulb, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { Camera, Megaphone, Rocket, Briefcase, Zap, Monitor, DollarSign } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
-const categoryMap: Record<string, { name: string; emoji: string; color: string }> = {
-  'content-creation':   { name: 'Content Creation',   emoji: '📸', color: '#FF6B6B' },
-  'digital-marketing':  { name: 'Digital Marketing',   emoji: '📢', color: '#4ECDC4' },
-  'entrepreneurship':   { name: 'Entrepreneurship',    emoji: '💡', color: '#F0A500' },
-  'career-development': { name: 'Career Development',  emoji: '🚀', color: '#667eea' },
-  'business-skills':    { name: 'Business Skills',     emoji: '💼', color: '#10B981' },
-  'productivity':       { name: 'Productivity',        emoji: '⚡', color: '#8B5CF6' },
-  'technology':         { name: 'Technology',          emoji: '💻', color: '#3B82F6' },
-  'financial-literacy': { name: 'Financial Literacy',  emoji: '💰', color: '#059669' },
+const categoryMap: Record<string, { name: string; Icon: LucideIcon; accent: string }> = {
+  'content-creation':   { name: 'Content Creation',   Icon: Camera,     accent: '#C89B5A' },
+  'digital-marketing':  { name: 'Digital Marketing',   Icon: Megaphone,  accent: '#4F7C82' },
+  'entrepreneurship':   { name: 'Entrepreneurship',    Icon: Lightbulb,  accent: '#C89B5A' },
+  'career-development': { name: 'Career Development',  Icon: Rocket,     accent: '#4F7C82' },
+  'business-skills':    { name: 'Business Skills',     Icon: Briefcase,  accent: '#C89B5A' },
+  'productivity':       { name: 'Productivity',        Icon: Zap,        accent: '#4F7C82' },
+  'technology':         { name: 'Technology',          Icon: Monitor,    accent: '#4F7C82' },
+  'financial-literacy': { name: 'Financial Literacy',  Icon: DollarSign, accent: '#C89B5A' },
 }
 
 type Lesson = {
@@ -47,39 +50,26 @@ export default function LessonPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    load()
-  }, [lessonId])
+  useEffect(() => { load() }, [lessonId])
 
   async function load() {
     try {
       setLoading(true)
       setError('')
-
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
 
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      // Get this lesson
       const { data: lessonData, error: lessonError } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('id', lessonId)
-        .single()
+        .from('lessons').select('*').eq('id', lessonId).single()
 
       if (lessonError || !lessonData) {
         setError('Lesson not found')
         router.push(`/learn/${slug}`)
         return
       }
-
       setLesson(lessonData)
 
-      // Get next lesson
       const { data: nextData } = await supabase
         .from('lessons')
         .select('id, title, description, order_index')
@@ -88,26 +78,17 @@ export default function LessonPage() {
         .order('order_index')
         .limit(1)
         .maybeSingle()
-
       setNextLesson(nextData)
 
-      // Check progress
       const { data: prog } = await supabase
-        .from('progress')
-        .select('status')
-        .eq('user_id', user.id)
-        .eq('lesson_id', lessonId)
-        .maybeSingle()
-
+        .from('progress').select('status')
+        .eq('user_id', user.id).eq('lesson_id', lessonId).maybeSingle()
       setIsCompleted(prog?.status === 'completed')
 
-      // Mark as started
       if (!prog) {
         await supabase.from('progress').upsert({
-          user_id: user.id,
-          lesson_id: lessonId,
-          status: 'started',
-          updated_at: new Date().toISOString(),
+          user_id: user.id, lesson_id: lessonId,
+          status: 'started', updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,lesson_id' })
       }
     } catch (err) {
@@ -121,20 +102,14 @@ export default function LessonPage() {
   async function markComplete() {
     if (!lessonId || marking) return
     setMarking(true)
-
     try {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-
       if (!user) return
-
       await supabase.from('progress').upsert({
-        user_id: user.id,
-        lesson_id: lessonId,
-        status: 'completed',
-        updated_at: new Date().toISOString(),
+        user_id: user.id, lesson_id: lessonId,
+        status: 'completed', updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id,lesson_id' })
-
       setIsCompleted(true)
     } catch (err) {
       console.error('Mark complete error:', err)
@@ -143,151 +118,122 @@ export default function LessonPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div style={{ maxWidth: '760px', margin: '0 auto', textAlign: 'center', padding: '80px 20px', color: '#94a3b8' }}>
-        Loading lesson…
-      </div>
-    )
-  }
+  if (loading) return (
+    <div className="max-w-3xl mx-auto text-center py-20 font-medium text-slate-400">Loading learning workspace…</div>
+  )
 
-  if (error || !lesson || !cat) {
-    return (
-      <div style={{ maxWidth: '760px', margin: '0 auto', textAlign: 'center', padding: '60px 20px' }}>
-        <p style={{ color: '#ef4444' }}>{error || 'Lesson not found'}</p>
-        <Link href={`/learn/${slug}`} style={{ color: '#3b82f6', marginTop: '20px', display: 'inline-block' }}>
-          ← Back to Category
-        </Link>
-      </div>
-    )
-  }
+  if (error || !lesson || !cat) return (
+    <div className="max-w-2xl mx-auto text-center py-16 bg-white border border-slate-200 rounded-2xl my-10 shadow-sm">
+      <p className="text-red-500 font-semibold mb-4">{error || 'Lesson parameters unreadable.'}</p>
+      <Link href={`/learn/${slug}`} className="text-user-gold font-bold hover:underline text-sm inline-flex items-center gap-1">
+        <ArrowLeft size={14} /> Back to Course Directory
+      </Link>
+    </div>
+  )
+
+  const { Icon, accent } = cat
 
   return (
-    <div style={{ maxWidth: '760px', margin: '0 auto', padding: '20px' }}>
-      {/* Breadcrumb */}
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px', color: '#64748b' }}>
-        <Link href="/learn" style={{ color: '#64748b', textDecoration: 'none' }}>Learning Hub</Link>
-        <span>›</span>
-        <Link href={`/learn/${slug}`} style={{ color: '#64748b', textDecoration: 'none' }}>{cat.name}</Link>
-        <span>›</span>
-        <span style={{ color: '#1E293B', fontWeight: '600' }}>{lesson.title}</span>
+    <div className="max-w-4xl mx-auto px-4 py-6">
+
+      {/* Breadcrumb Navigation Block */}
+      <div className="flex items-center gap-2 text-xs font-semibold text-[#8B7355] mb-6 tracking-wide">
+        <Link href="/learn" className="hover:text-[#4F7C82] transition-colors">Learning Hub</Link>
+        <span className="text-[#E8E0D0]">/</span>
+        <Link href={`/learn/${slug}`} className="hover:text-[#4F7C82] transition-colors">{cat.name}</Link>
+        <span className="text-[#E8E0D0]">/</span>
+        <span className="text-[#2D2416] truncate max-w-[240px] font-bold">{lesson.title}</span>
       </div>
 
-      {/* Lesson Header */}
-      <div style={{
-        background: `linear-gradient(135deg, ${cat.color}20, ${cat.color}10)`,
-        border: `2px solid ${cat.color}30`,
-        borderRadius: '20px', 
-        padding: '28px', 
-        marginBottom: '28px',
-      }}>
-        <span style={{ fontSize: '12px', fontWeight: 'bold', color: cat.color, textTransform: 'uppercase', letterSpacing: '1px' }}>
-          {cat.emoji} {cat.name}
-        </span>
-        <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#1E293B', margin: '12px 0 0' }}>
-          {lesson.title}
-        </h1>
+      {/* Lesson Banner */}
+      <div className="bg-white border border-[#E8E0D0] rounded-2xl p-8 mb-6 relative overflow-hidden shadow-md">
+        <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 opacity-4 pointer-events-none text-[#C89B5A]">
+          <Icon size={180} />
+        </div>
+        
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1.5 rounded-lg bg-[#F8F5EF] border border-[#E8E0D0]">
+            <Icon size={16} style={{ color: '#4F7C82' }} />
+          </div>
+          <span className="text-xs font-black uppercase tracking-wider text-[#8B7355]">
+            {cat.name}
+          </span>
+        </div>
+
+        <h1 className="text-[#2D2416] text-2xl md:text-3xl font-black tracking-tight mb-2">{lesson.title}</h1>
+        
         {isCompleted && (
-          <div style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#D1FAE5', color: '#065F46', borderRadius: '9999px', padding: '4px 16px', fontSize: '13px', fontWeight: '600' }}>
-            ✓ Completed
+          <div className="inline-flex items-center gap-1.5 mt-2 text-xs font-black px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+            <CheckCircle2 size={13} className="text-emerald-600" /> Lesson Complete
           </div>
         )}
       </div>
 
-      {/* Main Content */}
-      <div style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '20px', border: '1px solid #E2E8F0' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1E293B', marginBottom: '16px' }}>📖 Lesson Content</h2>
-        <div style={{ color: '#374151', fontSize: '16px', lineHeight: 1.85, whiteSpace: 'pre-wrap' }}>
+      {/* Lesson Content */}
+      <div className="bg-white border border-[#E8E0D0] rounded-2xl p-8 mb-6 shadow-md max-w-3xl mx-auto">
+        <h2 className="text-[#2D2416] font-black text-sm uppercase tracking-wider mb-5 flex items-center gap-2 pb-3 border-b border-[#E8E0D0]">
+          <BookOpen size={16} className="text-[#4F7C82]" /> Lesson Content
+        </h2>
+        <div className="text-[#2D2416] text-sm md:text-base leading-relaxed whitespace-pre-wrap font-medium space-y-4" style={{ lineHeight: '1.7' }}>
           {lesson.content}
         </div>
       </div>
 
-      {/* Example */}
       {lesson.example && (
-        <div style={{
-          background: `${cat.color}10`, 
-          border: `1px solid ${cat.color}30`,
-          borderRadius: '16px', 
-          padding: '28px', 
-          marginBottom: '24px',
-        }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: cat.color, marginBottom: '14px' }}>
-            💡 Real-Life Example
-          </h2>
-          <p style={{ color: '#374151', fontSize: '15.5px', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+        <div className="border-l-4 border-l-[#C89B5A] bg-[#FDF9F3] rounded-r-2xl rounded-l-sm p-6 mb-8 max-w-3xl mx-auto">
+          <h3 className="font-black text-sm uppercase tracking-wider mb-3 flex items-center gap-2 text-[#2D2416]">
+            <Lightbulb size={16} className="text-[#C89B5A]" /> Real-World Example
+          </h3>
+          <p className="text-[#4A3520] text-sm leading-relaxed whitespace-pre-wrap font-medium" style={{ lineHeight: '1.7' }}>
             {lesson.example}
           </p>
         </div>
       )}
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        {!isCompleted ? (
-          <button
-            onClick={markComplete}
-            disabled={marking}
-            style={{
-              background: cat.color, 
-              color: 'white', 
-              border: 'none',
-              padding: '14px 32px', 
-              borderRadius: '12px', 
-              fontWeight: 'bold',
-              fontSize: '16px', 
-              cursor: marking ? 'not-allowed' : 'pointer',
-              opacity: marking ? 0.75 : 1,
-            }}
-          >
-            {marking ? 'Saving...' : '✓ Mark as Complete'}
-          </button>
-        ) : nextLesson ? (
-          <Link
-            href={`/learn/${slug}/${nextLesson.id}`}
-            style={{
-              background: cat.color, 
-              color: 'white', 
-              textDecoration: 'none',
-              padding: '14px 32px', 
-              borderRadius: '12px', 
-              fontWeight: 'bold', 
-              fontSize: '16px',
-            }}
-          >
-            Next Lesson → {nextLesson.title}
-          </Link>
-        ) : (
-          <Link
-            href={`/learn/${slug}`}
-            style={{
-              background: cat.color, 
-              color: 'white', 
-              textDecoration: 'none',
-              padding: '14px 32px', 
-              borderRadius: '12px', 
-              fontWeight: 'bold', 
-              fontSize: '16px',
-            }}
-          >
-            ← Back to Category
-          </Link>
-        )}
-
+      {/* Bottom Navigation */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between border-t border-[#E8E0D0] pt-6 max-w-3xl mx-auto">
         <Link
           href={`/learn/${slug}`}
-          style={{
-            background: 'white', 
-            color: '#64748b', 
-            textDecoration: 'none',
-            padding: '14px 24px', 
-            borderRadius: '12px', 
-            fontWeight: '600', 
-            fontSize: '15px',
-            border: '1px solid #E2E8F0',
-          }}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-bold text-sm text-[#4F7C82] bg-white border-2 border-[#4F7C82] hover:bg-[#F8F5EF] transition-all"
         >
-          Back to {cat.name}
+          <ArrowLeft size={14} /> Previous Lesson
         </Link>
+
+        <div className="flex gap-3 w-full sm:w-auto">
+          {!isCompleted ? (
+            <button
+              onClick={markComplete}
+              disabled={marking}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full font-black text-sm text-white transition-all bg-[#4F7C82] hover:bg-[#3d6068] shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-60"
+            >
+              {marking ? 'Saving...' : 'Mark Complete ✓'}
+            </button>
+          ) : nextLesson ? (
+            <Link
+              href={`/learn/${slug}/${nextLesson.id}`}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-black text-sm text-white bg-[#C89B5A] hover:bg-[#b8893a] shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+            >
+              Next Lesson <ArrowRight size={14} />
+            </Link>
+          ) : (
+            <Link
+              href={`/learn/${slug}`}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-black text-sm text-white bg-[#4F7C82] hover:bg-[#3d6068] shadow-md transition-all"
+            >
+              Finish Category <ArrowLeft size={14} />
+            </Link>
+          )}
+        </div>
       </div>
+
+      {/* Ask AI Help — floating button */}
+      <Link
+        href="/ai-tutor"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-[#4F7C82] hover:bg-[#3d6068] text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all z-40 text-xl"
+        title="Ask AI Help"
+      >
+        🐻
+      </Link>
     </div>
   )
 }

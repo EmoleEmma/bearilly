@@ -4,16 +4,19 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { ArrowLeft, ClipboardList } from 'lucide-react'
+import { Camera, Megaphone, Lightbulb, Rocket, Briefcase, Zap, Monitor, DollarSign } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
-const categoryMap: Record<string, { name: string; emoji: string; color: string; bg: string }> = {
-  'content-creation':   { name: 'Content Creation',   emoji: '📸', color: '#FF6B6B', bg: '#FFF0F0' },
-  'digital-marketing':  { name: 'Digital Marketing',   emoji: '📢', color: '#4ECDC4', bg: '#F0FFFE' },
-  'entrepreneurship':   { name: 'Entrepreneurship',    emoji: '💡', color: '#F0A500', bg: '#FFFBF0' },
-  'career-development': { name: 'Career Development',  emoji: '🚀', color: '#667eea', bg: '#F0F0FF' },
-  'business-skills':    { name: 'Business Skills',     emoji: '💼', color: '#10B981', bg: '#F0FFF8' },
-  'productivity':       { name: 'Productivity',        emoji: '⚡', color: '#8B5CF6', bg: '#F5F0FF' },
-  'technology':         { name: 'Technology',          emoji: '💻', color: '#3B82F6', bg: '#F0F6FF' },
-  'financial-literacy': { name: 'Financial Literacy',  emoji: '💰', color: '#059669', bg: '#F0FFF8' },
+const categoryMap: Record<string, { name: string; Icon: LucideIcon; accent: string }> = {
+  'content-creation':   { name: 'Content Creation',   Icon: Camera,     accent: '#C89B5A' },
+  'digital-marketing':  { name: 'Digital Marketing',   Icon: Megaphone,  accent: '#4F7C82' },
+  'entrepreneurship':   { name: 'Entrepreneurship',    Icon: Lightbulb,  accent: '#C89B5A' },
+  'career-development': { name: 'Career Development',  Icon: Rocket,     accent: '#4F7C82' },
+  'business-skills':    { name: 'Business Skills',     Icon: Briefcase,  accent: '#C89B5A' },
+  'productivity':       { name: 'Productivity',        Icon: Zap,        accent: '#4F7C82' },
+  'technology':         { name: 'Technology',          Icon: Monitor,    accent: '#4F7C82' },
+  'financial-literacy': { name: 'Financial Literacy',  Icon: DollarSign, accent: '#C89B5A' },
 }
 
 type Lesson = {
@@ -44,10 +47,8 @@ export default function CategoryPage() {
   async function load() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setLoading(false)   // ← ADD THIS
-      return
-    }
+    if (!user) { setLoading(false); return }
+
     const { data: rawLessons } = await supabase
       .from('lessons')
       .select('id, title, description, order_index')
@@ -76,51 +77,45 @@ export default function CategoryPage() {
       router.push(`/learn/${slug}/${lesson.id}`)
       return
     }
-    // Show guidance message before starting
     setPendingLesson(lesson)
     setShowGuidance(true)
   }
 
   function proceedToLesson() {
-    if (pendingLesson) {
-      router.push(`/learn/${slug}/${pendingLesson.id}`)
-    }
+    if (pendingLesson) router.push(`/learn/${slug}/${pendingLesson.id}`)
     setShowGuidance(false)
   }
 
   if (!cat) return null
 
+  const { Icon, accent } = cat
   const completed = lessons.filter(l => l.status === 'completed').length
   const pct = lessons.length > 0 ? Math.round((completed / lessons.length) * 100) : 0
 
   return (
-    <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-      {/* Guidance Modal */}
+    <div className="max-w-3xl mx-auto px-4 py-4">
+
+      {/* Guidance Confirmation Modal Canvas */}
       {showGuidance && pendingLesson && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
-        }}>
-          <div style={{ background: 'white', borderRadius: '20px', padding: '36px', maxWidth: '480px', width: '100%', textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>{cat.emoji}</div>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E293B', margin: '0 0 12px' }}>
-              Before You Begin
-            </h2>
-            <p style={{ color: '#64748b', fontSize: '15px', lineHeight: 1.7, margin: '0 0 24px' }}>
-              You&apos;re about to start <strong>{pendingLesson.title}</strong>. Take your time reading each section carefully.
-              After completing all lessons in this category, you&apos;ll unlock the category test.
-              Good luck! 🎯
+        <div className="fixed inset-0 bg-[#1E293B]/60 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+          <div className="bg-white border border-[#E8E0D0] rounded-2xl p-8 max-w-md w-full text-center shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-14 h-14 bg-[#F8F5EF] border border-[#E8E0D0] rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Icon size={24} style={{ color: accent }} />
+            </div>
+            <h2 className="text-[#2D2416] text-xl font-black tracking-tight mb-2">Before You Begin</h2>
+            <p className="text-[#8B7355] text-sm font-medium leading-relaxed mb-6">
+              You are about to engage with <strong className="text-slate-800 font-bold">{pendingLesson.title}</strong>. Take your time reviewing each block context thoroughly. Complete all entries inside this category to activate your evaluation test.
             </p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <div className="flex gap-3 justify-center">
               <button
                 onClick={() => setShowGuidance(false)}
-                style={{ padding: '12px 24px', borderRadius: '10px', border: '1px solid #E2E8F0', background: 'white', color: '#64748b', cursor: 'pointer', fontWeight: '600' }}
+                className="px-5 py-2.5 rounded-full border border-[#E8E0D0] bg-[#F8F5EF] text-[#8B7355] font-bold text-xs uppercase tracking-wider hover:bg-[#E8E0D0] transition-colors"
               >
                 Not Yet
               </button>
               <button
                 onClick={proceedToLesson}
-                style={{ padding: '12px 28px', borderRadius: '10px', border: 'none', background: cat.color, color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px' }}
+                className="px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-wider text-white shadow-sm transition-all hover:opacity-90 bg-[#4F7C82]"
               >
                 Start Lesson →
               </button>
@@ -129,102 +124,99 @@ export default function CategoryPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <Link href="/learn" style={{ color: '#64748b', fontSize: '14px', textDecoration: 'none' }}>
-          ← Back to Learning Hub
+      {/* Navigation Return Hook */}
+      <div className="mb-6">
+        <Link href="/learn" className="text-[#8B7355] text-xs font-black uppercase tracking-wider hover:text-[#4F7C82] transition-colors flex items-center gap-1.5">
+          <ArrowLeft size={13} /> Back to Learning Hub
         </Link>
       </div>
 
-      <div style={{
-        background: `linear-gradient(135deg, ${cat.color}, ${cat.color}99)`,
-        borderRadius: '20px', padding: '32px', color: 'white', marginBottom: '28px',
-      }}>
-        <div style={{ fontSize: '48px', marginBottom: '12px' }}>{cat.emoji}</div>
-        <h1 style={{ fontSize: '26px', fontWeight: 'bold', margin: '0 0 8px' }}>{cat.name}</h1>
-        <p style={{ opacity: 0.9, fontSize: '14px', margin: '0 0 16px' }}>
-          {lessons.length} lessons · {completed} completed
-        </p>
-        <div style={{ background: 'rgba(255,255,255,0.3)', borderRadius: '10px', height: '8px', overflow: 'hidden' }}>
-          <div style={{ background: 'white', height: '100%', width: `${pct}%`, borderRadius: '10px', transition: 'width 0.4s' }} />
+      {/* Category Banner */}
+      <div className="bg-[#1E293B] rounded-2xl p-8 mb-6 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ background: 'radial-gradient(circle at 90% 50%, #C89B5A 0%, transparent 60%)' }} />
+        <div className="flex items-start justify-between gap-4 mb-5">
+          <div>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#4F7C82] px-3 py-1 rounded-full bg-[#4F7C82]/10 border border-[#4F7C82]/20 mb-3">
+              {lessons.length} Lessons
+            </span>
+            <h1 className="text-white text-2xl font-black tracking-tight mb-1">{cat.name}</h1>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">{completed} of {lessons.length} completed</p>
+          </div>
+          <div className="w-14 h-14 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Icon size={26} style={{ color: '#C89B5A' }} />
+          </div>
+        </div>
+        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #C89B5A, #E7C997)' }}
+          />
         </div>
       </div>
 
-      {/* All done — show Take a Test button */}
+      {/* Performance Audit Activation Banner */}
       {allDone && (
-        <div style={{
-          background: '#F0FFF8', border: '2px solid #10B981', borderRadius: '16px',
-          padding: '24px', textAlign: 'center', marginBottom: '24px',
-        }}>
-          <div style={{ fontSize: '36px', marginBottom: '8px' }}>🏆</div>
-          <h3 style={{ fontWeight: 'bold', color: '#065F46', fontSize: '18px', margin: '0 0 8px' }}>
-            All Lessons Completed!
-          </h3>
-          <p style={{ color: '#047857', fontSize: '14px', margin: '0 0 16px' }}>
-            You&apos;ve finished all lessons in this category. Ready to take the test?
-          </p>
-          <Link href={`/learn/${slug}/test`} style={{
-            display: 'inline-block', background: '#10B981', color: 'white',
-            padding: '14px 32px', borderRadius: '12px', textDecoration: 'none',
-            fontWeight: 'bold', fontSize: '16px',
-          }}>
-            Take the Test 📝
+        <div className="bg-white border border-[#C89B5A]/40 rounded-2xl p-6 text-center mb-6 shadow-md animate-in fade-in duration-200">
+          <ClipboardList size={32} className="text-[#C89B5A] mx-auto mb-2" />
+          <h3 className="text-[#2D2416] font-black text-base tracking-tight mb-1">All Lessons Complete! 🎉</h3>
+          <p className="text-[#8B7355] text-xs font-medium mb-4 leading-relaxed">You've finished every lesson in this category. Take the assessment to earn your certification.</p>
+          <Link
+            href={`/learn/${slug}/test`}
+            className="inline-block px-8 py-3 rounded-full font-black text-xs uppercase tracking-wider text-white transition-all shadow-md bg-[#4F7C82] hover:bg-[#3d6068]"
+          >
+            Take Assessment →
           </Link>
         </div>
       )}
 
-      {/* Lessons list */}
+      {/* Segmented Modules Grid Stream */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>Loading lessons…</div>
+        <div className="text-center py-12 text-[#8B7355] text-xs font-bold uppercase tracking-wider">Loading lessons…</div>
       ) : lessons.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-          <p style={{ fontSize: '32px' }}>🚧</p>
-          <p>Lessons coming soon for this category.</p>
+        <div className="text-center py-16 bg-white border border-[#E8E0D0] rounded-2xl shadow-sm text-[#8B7355]">
+          <p className="text-3xl mb-2">📋</p>
+          <p className="text-xs font-black uppercase tracking-wider">No lessons available yet — check back soon.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="flex flex-col gap-3">
           {lessons.map((lesson, i) => {
             const isCompleted = lesson.status === 'completed'
             const isStarted = lesson.status === 'started'
+            const label = isCompleted ? 'Review' : isStarted ? 'Continue' : 'Launch'
 
             return (
               <div
                 key={lesson.id}
                 onClick={() => handleLessonClick(lesson)}
-                style={{
-                  background: 'white', borderRadius: '14px', padding: '20px 24px',
-                  border: `2px solid ${isCompleted ? cat.color : '#E2E8F0'}`,
-                  display: 'flex', alignItems: 'center', gap: '16px',
-                  cursor: 'pointer', transition: 'border-color 0.2s',
-                }}
+                className="bg-white rounded-xl px-5 py-4 flex items-center gap-4 cursor-pointer transition-all border hover:border-[#C89B5A] hover:shadow-md group"
+                style={{ borderColor: isCompleted ? 'rgba(79,124,130,0.25)' : '#E8E0D0' }}
               >
-                {/* Number / check */}
-                <div style={{
-                  width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
-                  background: isCompleted ? cat.color : isStarted ? cat.color + '20' : '#F1F5F9',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: isCompleted ? '18px' : '15px',
-                  fontWeight: 'bold', color: isCompleted ? 'white' : cat.color,
-                }}>
+                <div
+                  className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black"
+                  style={{
+                    background: isCompleted ? '#4F7C82' : isStarted ? '#F8F5EF' : '#FFFFFF',
+                    color: isCompleted ? '#FFFFFF' : isStarted ? '#4F7C82' : '#8B7355',
+                    border: `1.5px solid ${isCompleted ? '#4F7C82' : isStarted ? '#4F7C82' : '#E8E0D0'}`,
+                  }}
+                >
                   {isCompleted ? '✓' : i + 1}
                 </div>
 
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: '600', color: '#1E293B', margin: '0 0 3px', fontSize: '15px' }}>
-                    {lesson.title}
-                  </p>
-                  <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0 }}>
-                    {lesson.description}
-                  </p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[#2D2416] font-black text-sm mb-0.5 group-hover:text-[#C89B5A] transition-colors tracking-tight">{lesson.title}</p>
+                  <p className="text-[#8B7355] text-xs font-medium truncate">{lesson.description}</p>
                 </div>
 
-                <div style={{
-                  fontSize: '13px', fontWeight: 'bold', color: 'white',
-                  background: isCompleted ? cat.color : isStarted ? cat.color : '#94a3b8',
-                  padding: '6px 14px', borderRadius: '20px', flexShrink: 0,
-                }}>
-                  {isCompleted ? 'Review' : isStarted ? 'Continue' : 'Start'}
-                </div>
+                <span
+                  className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex-shrink-0 transition-colors border"
+                  style={{
+                    background: isCompleted ? 'rgba(79,124,130,0.08)' : isStarted ? '#F8F5EF' : '#FFFFFF',
+                    borderColor: isCompleted ? 'rgba(79,124,130,0.3)' : isStarted ? 'rgba(79,124,130,0.3)' : '#E8E0D0',
+                    color: (isCompleted || isStarted) ? '#4F7C82' : '#8B7355',
+                  }}
+                >
+                  {label}
+                </span>
               </div>
             )
           })}

@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
   // Fetch profile
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_activated')
+    .select('is_activated, role')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -53,7 +53,9 @@ export async function middleware(request: NextRequest) {
   if (!profile?.is_activated) {
   return NextResponse.redirect(new URL('/login', request.url))
 }
-
+  if (pathname.startsWith('/admin') && profile?.role !== 'admin') {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
   return supabaseResponse
 }
 

@@ -9,6 +9,7 @@ import {
   Bot,
   Wrench,
   ClipboardList,
+  Trophy,
   LogOut,
   X,
   Loader2,
@@ -21,8 +22,9 @@ const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Learn', href: '/learn', icon: BookOpen },
   { label: 'AI Tutor', href: '/ai-tutor', icon: Bot },
-  { label: 'Opportunities', href: '/toolkit', icon: Wrench },
+  { label: 'Toolkit', href: '/toolkit', icon: Wrench },
   { label: 'Assessments', href: '/assessments', icon: ClipboardList },
+  { label: 'My Quizzes', href: '/my-quizzes', icon: Trophy },
 ]
 
 type SidebarProps = {
@@ -36,7 +38,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, loading } = useUser()
   const [signingOut, setSigningOut] = useState(false)
 
-  // Get user's first initial for avatar
   const fullName = user?.user_metadata?.full_name ?? ''
   const email = user?.email ?? ''
   const initial = fullName ? fullName[0].toUpperCase() : email ? email[0].toUpperCase() : 'U'
@@ -52,41 +53,45 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile overlay — darkens background when sidebar is open */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          className="fixed inset-0 bg-admin-deep/20 backdrop-blur-sm z-20 lg:hidden"
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar container */}
       <aside
         className={clsx(
-          'fixed top-0 left-0 h-full w-64 bg-[#1E3A5F] z-30 flex flex-col transition-transform duration-300',
+          'fixed top-0 left-0 h-full w-64 bg-[#C89B5A] border-r border-[#B8893A] z-30 flex flex-col transition-transform duration-300 shadow-lg',
           'lg:translate-x-0 lg:static lg:z-auto',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        {/* ── Logo & close button ── */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+        {/* Logo & close */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-[#B8893A]/50">
           <div>
-            <h1 className="text-white font-bold text-xl tracking-tight">
+            <h1 className="text-white font-black text-xl tracking-tight flex items-center gap-1.5">
+              <span className="w-2 h-4 bg-white/80 rounded-sm block"></span>
               Bearilly
             </h1>
-            <p className="text-blue-300 text-xs mt-0.5">Creator Platform</p>
+            <p className="text-white/70 text-[10px] font-extrabold tracking-wider uppercase mt-0.5">Platform Studio</p>
           </div>
           <button
             onClick={onClose}
-            className="text-white/60 hover:text-white transition-colors lg:hidden p-1 rounded-md hover:bg-white/10"
+            className="text-white/70 hover:text-white transition-colors lg:hidden p-1 rounded-xl hover:bg-white/20 border border-transparent hover:border-white/30"
             aria-label="Close sidebar"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* ── Navigation ── */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
+          {/* Section label */}
+          <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest px-4 pb-1">
+            Main Menu
+          </p>
+
           {navItems.map(({ label, href, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + '/')
             return (
@@ -95,76 +100,82 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 href={href}
                 onClick={onClose}
                 className={clsx(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 group',
+                  'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 group relative',
                   active
-                    ? 'bg-white/15 text-white'
-                    : 'text-blue-200 hover:bg-white/10 hover:text-white'
+                    ? 'bg-white/25 border border-white/40 text-white shadow-sm'
+                    : 'text-white/75 hover:bg-white/15 hover:text-white'
                 )}
               >
+                {active && (
+                  <span className="absolute left-0 top-3 bottom-3 w-1 bg-white rounded-r-md"></span>
+                )}
                 <Icon
-                  size={18}
+                  size={17}
                   className={clsx(
-                    'transition-colors',
-                    active ? 'text-white' : 'text-blue-300 group-hover:text-white'
+                    'transition-colors flex-shrink-0',
+                    active ? 'text-white' : 'text-white/50 group-hover:text-white'
                   )}
                 />
                 <span>{label}</span>
                 {active && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#F0A500]" />
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </Link>
             )
           })}
         </nav>
 
-        {/* ── Divider ── */}
-        <div className="border-t border-white/10 mx-3" />
+        {/* Divider + account section */}
+        <div className="border-t border-white/20 h-px" />
 
-        {/* ── User info & sign out ── */}
         <div className="px-3 py-4 space-y-1">
-          {/* User info row */}
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg">
-            {/* Avatar circle */}
-            <div className="w-8 h-8 rounded-full bg-[#F0A500] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+          <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest px-4 pb-1">
+            Account
+          </p>
+
+          {/* User info */}
+          <Link
+            href="/profile"
+            onClick={onClose}
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/20 transition-all duration-200 border border-transparent hover:border-white/30 group"
+          >
+            <div className="w-8 h-8 rounded-xl bg-white/30 border border-white/40 flex items-center justify-center font-extrabold text-white text-sm flex-shrink-0 shadow-inner uppercase">
               {loading ? (
-                <Loader2 size={14} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin text-white" />
               ) : (
                 initial
               )}
             </div>
-            {/* Name & email */}
             <div className="flex-1 min-w-0">
               {loading ? (
                 <>
-                  <div className="h-3 bg-white/20 rounded animate-pulse w-20 mb-1" />
-                  <div className="h-2.5 bg-white/10 rounded animate-pulse w-28" />
+                  <div className="h-3 bg-admin-gray rounded animate-pulse w-16 mb-1" />
+                  <div className="h-2 bg-admin-gray/60 rounded animate-pulse w-24" />
                 </>
               ) : (
                 <>
-                  <p className="text-white text-sm font-medium truncate">
-                    {displayName}
-                  </p>
+                  <p className="text-white text-sm font-bold truncate">{displayName}</p>
                   {fullName && (
-                    <p className="text-blue-300 text-xs truncate">{email}</p>
+                    <p className="text-white/60 text-xs font-semibold truncate mt-0.5">{email}</p>
                   )}
                 </>
               )}
             </div>
-          </div>
+          </Link>
 
-          {/* Sign out button */}
+          {/* Sign out */}
           <button
             onClick={handleSignOut}
             disabled={signingOut}
             className={clsx(
-              'flex items-center gap-3 px-4 py-2.5 w-full rounded-lg text-sm font-medium transition-all duration-200',
+              'flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-bold transition-all duration-200',
               signingOut
-                ? 'text-blue-300/50 cursor-not-allowed'
-                : 'text-blue-200 hover:bg-white/10 hover:text-white'
+                ? 'text-white/30 cursor-not-allowed'
+                : 'text-white/70 hover:bg-white/20 hover:text-white border border-transparent hover:border-white/30'
             )}
           >
             {signingOut ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin text-white/40" />
             ) : (
               <LogOut size={16} />
             )}

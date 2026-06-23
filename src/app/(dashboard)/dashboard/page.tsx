@@ -3,6 +3,34 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import {
+  Camera, Megaphone, Lightbulb, Rocket,
+  BookOpen, Bot, ClipboardList, Wrench, User,
+  Video, Palette, Mic, PenLine,
+  ArrowRight, ChevronRight, Sparkles
+} from 'lucide-react'
+
+const courseCategories = [
+  { name: 'Content Creation',   slug: 'content-creation',   Icon: Camera,    accent: '#C89B5A' },
+  { name: 'Digital Marketing',  slug: 'digital-marketing',  Icon: Megaphone, accent: '#4F7C82' },
+  { name: 'Entrepreneurship',   slug: 'entrepreneurship',   Icon: Lightbulb, accent: '#C89B5A' },
+  { name: 'Career Development', slug: 'career-development', Icon: Rocket,    accent: '#4F7C82' },
+]
+
+const interfaces = [
+  { label: 'Learning Hub',  href: '/learn',       Icon: BookOpen,      accent: '#C89B5A', desc: 'Browse your courses' },
+  { label: 'AI Guide',      href: '/ai-tutor',    Icon: Bot,           accent: '#4F7C82', desc: 'Ask your AI tutor' },
+  { label: 'Assessments',   href: '/assessments', Icon: ClipboardList, accent: '#C89B5A', desc: 'Submit your work' },
+  { label: 'Toolkit',       href: '/toolkit',     Icon: Wrench,        accent: '#4F7C82', desc: 'Creative tools' },
+  { label: 'My Profile',    href: '/profile',     Icon: User,          accent: '#C89B5A', desc: 'View your progress' },
+]
+
+const toolkitItems = [
+  { label: 'Video Tools',   Icon: Video,   accent: '#C89B5A', desc: 'Editing & subtitles' },
+  { label: 'Design Tools',  Icon: Palette, accent: '#4F7C82', desc: 'Graphics & assets' },
+  { label: 'Audio Tools',   Icon: Mic,     accent: '#C89B5A', desc: 'Voice & sound' },
+  { label: 'Writing Tools', Icon: PenLine, accent: '#4F7C82', desc: 'Captions & scripts' },
+]
 
 export default function DashboardPage() {
   const [userName, setUserName] = useState('')
@@ -17,66 +45,132 @@ export default function DashboardPage() {
     })
   }, [])
 
-  const courseCategories = [
-    { name: 'Content Creation', emoji: '📸', color: '#FF6B6B', bg: '#FFF0F0' },
-    { name: 'Digital Marketing', emoji: '📢', color: '#4ECDC4', bg: '#F0FFFE' },
-    { name: 'Entrepreneurship', emoji: '💡', color: '#F0A500', bg: '#FFFBF0' },
-    { name: 'Career Development', emoji: '🚀', color: '#667eea', bg: '#F0F0FF' },
-    { name: 'Business Skills', emoji: '💼', color: '#10B981', bg: '#F0FFF8' },
-    { name: 'Productivity', emoji: '⚡', color: '#8B5CF6', bg: '#F5F0FF' },
-    { name: 'Technology', emoji: '💻', color: '#3B82F6', bg: '#F0F6FF' },
-    { name: 'Financial Literacy', emoji: '💰', color: '#059669', bg: '#F0FFF8' },
-  ]
-
-  const interfaces = [
-    { label: 'Learning Hub', href: '/learn', emoji: '📚', color: '#667eea', bg: '#F0F0FF', desc: 'Start or continue your courses' },
-    { label: 'Bearilly AI Guide', href: '/ai-tutor', emoji: '🤖', color: '#10B981', bg: '#F0FFF8', desc: 'Get help navigating the app' },
-    { label: 'Assessments', href: '/assessments', emoji: '📝', color: '#F0A500', bg: '#FFFBF0', desc: 'Take tests and see your scores' },
-    { label: 'Opportunities', href: '/toolkit', emoji: '🌟', color: '#8B5CF6', bg: '#F5F0FF', desc: 'Internships, competitions and programs' },
-    { label: 'My Profile', href: '/profile', emoji: '👤', color: '#EF4444', bg: '#FFF0F0', desc: 'View your progress and courses' },
-  ]
-
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+    <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
 
       {/* Welcome Banner */}
-      <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '20px', padding: '32px', marginBottom: '28px', color: 'white' }}>
-        <p style={{ fontSize: '15px', opacity: 0.85, margin: '0 0 6px' }}>Hello Welcome! 👋👋</p>
-        <h1 style={{ fontSize: '26px', fontWeight: 'bold', margin: '0 0 6px' }}>
-          {loading ? '...' : `Good to see you, ${userName}!`}
-        </h1>
-        <p style={{ fontSize: '15px', opacity: 0.85, margin: 0 }}>What would you like to do today?</p>
-      </div>
-
-      {/* Main Interfaces */}
-      <h2 style={{ fontWeight: 'bold', color: '#1E293B', fontSize: '18px', marginBottom: '14px' }}>Platform Sections</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '32px' }}>
-        {interfaces.map((item) => (
-          <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-            <div style={{ background: item.bg, borderRadius: '16px', padding: '20px 16px', border: `2px solid ${item.color}25`, textAlign: 'center', height: '100%' }}>
-              <div style={{ fontSize: '36px', marginBottom: '10px' }}>{item.emoji}</div>
-              <p style={{ color: item.color, fontWeight: 'bold', fontSize: '14px', margin: '0 0 6px' }}>{item.label}</p>
-              <p style={{ color: '#64748b', fontSize: '12px', margin: 0, lineHeight: 1.4 }}>{item.desc}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Learning Hub Preview */}
-      <div style={{ background: 'white', borderRadius: '20px', padding: '24px', marginBottom: '24px', border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <h2 style={{ fontWeight: 'bold', color: '#1E293B', fontSize: '18px', margin: 0 }}>📚 Learning Hub</h2>
-          <Link href="/learn" style={{ color: '#667eea', fontSize: '13px', textDecoration: 'none', fontWeight: '600' }}>View All →</Link>
+      <div className="bg-white border border-[#E8E0D0] rounded-2xl p-10 relative overflow-hidden shadow-md">
+        <div className="absolute top-0 right-0 p-10 text-[#C89B5A]/6 pointer-events-none">
+          <Sparkles size={160} />
         </div>
-        <p style={{ color: '#64748b', fontSize: '14px', margin: '0 0 20px' }}>What course would you like to study today?</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-          {courseCategories.map((cat) => (
-            <Link key={cat.name} href="/learn" style={{ textDecoration: 'none' }}>
-              <div style={{ background: cat.bg, borderRadius: '14px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px', border: `1px solid ${cat.color}20` }}>
-                <span style={{ fontSize: '28px' }}>{cat.emoji}</span>
+        <p className="text-[#C89B5A] font-bold uppercase tracking-widest text-xs mb-3">Welcome back</p>
+        <h1 className="text-4xl font-black text-[#2D2416] tracking-tight mb-3">
+          {loading ? 'Loading...' : `Hey, ${userName} 👋`}
+        </h1>
+        <p className="text-[#8B7355] text-base font-medium mb-7 max-w-md leading-relaxed">
+          Pick up where you left off or dive into something new today.
+        </p>
+        <Link href="/learn" className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#4F7C82] text-white text-sm font-black tracking-wide hover:bg-[#3d6068] transition-colors shadow-sm">
+          Continue Learning <ArrowRight size={15} />
+        </Link>
+      </div>
+
+      {/* Quick Navigation */}
+      <div>
+        <h2 className="text-[#2D2416] font-black text-sm uppercase tracking-wider mb-5">Quick Navigation</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          {interfaces.map(({ label, href, Icon, accent, desc }) => (
+            <Link key={href} href={href} className="no-underline group">
+              <div className="flex flex-col items-center gap-2 px-4 py-5 rounded-2xl bg-white border border-[#E8E0D0] hover:border-[#C89B5A] hover:shadow-md transition-all text-center">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18` }}>
+                  <Icon size={18} style={{ color: accent }} />
+                </div>
+                <span className="text-[#2D2416] font-bold text-xs group-hover:text-[#C89B5A] transition-colors">{label}</span>
+                <span className="text-[#8B7355] text-[10px] font-medium leading-tight">{desc}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Course Paths */}
+      <div className="bg-white border border-[#E8E0D0] rounded-2xl p-8 shadow-md">
+        <div className="flex justify-between items-center pb-5 border-b border-[#E8E0D0] mb-6">
+          <div>
+            <h2 className="text-[#2D2416] font-black text-base flex items-center gap-2">
+              <BookOpen size={18} className="text-[#C89B5A]" /> Course Paths
+            </h2>
+            <p className="text-[#8B7355] text-xs font-medium mt-1">Choose a track and continue your progress</p>
+          </div>
+          <Link href="/learn" className="text-[#4F7C82] text-xs font-black uppercase tracking-wider hover:text-[#C89B5A] transition-colors flex items-center gap-1 flex-shrink-0">
+            View All <ChevronRight size={14} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {courseCategories.map(({ name, slug, Icon, accent }) => (
+            <Link key={slug} href="/learn" className="no-underline group">
+              <div className="border border-[#E8E0D0] rounded-xl p-7 flex flex-col gap-4 hover:border-[#C89B5A] hover:shadow-md transition-all relative overflow-hidden bg-[#FDFCFA]">
+                <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl" style={{ background: accent }} />
+                <Icon size={26} style={{ color: accent }} className="mt-1" />
+                <p className="text-[#2D2416] font-black text-sm leading-snug">{name}</p>
+                <div className="h-1.5 bg-[#F0EDE8] rounded-full overflow-hidden">
+                  <div className="h-full w-0 rounded-full" style={{ background: accent }} />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-wider transition-colors" style={{ color: accent }}>
+                  Start Track →
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* AI Tutor + Assessments */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Link href="/ai-tutor" className="no-underline group">
+          <div className="rounded-2xl p-8 h-full flex flex-col justify-between transition-all hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #4F7C82 0%, #3d6068 100%)' }}>
+            <div>
+              <span className="text-4xl mb-4 block">🐻</span>
+              <h3 className="text-white font-black text-base mb-2">Bearilly AI Tutor</h3>
+              <p className="text-white/75 text-sm font-medium leading-relaxed mb-6">
+                Your personal AI tutor is always ready. Ask anything about your lessons, get feedback, or work through a concept you&apos;re stuck on.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 text-sm font-black text-white group-hover:gap-3 transition-all">
+              Start a Conversation <ArrowRight size={14} />
+            </span>
+          </div>
+        </Link>
+
+        <Link href="/assessments" className="no-underline group">
+          <div className="bg-white border border-[#E8E0D0] rounded-2xl p-8 h-full hover:border-[#C89B5A]/60 hover:shadow-md transition-all flex flex-col justify-between">
+            <div>
+              <ClipboardList size={30} className="mb-4 text-[#C89B5A]" />
+              <h3 className="text-[#2D2416] font-black text-base mb-2">Assessments</h3>
+              <p className="text-[#8B7355] text-sm font-medium leading-relaxed mb-6">
+                Submit your completed assignments and track feedback from your instructors all in one place.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 text-sm font-black text-[#C89B5A] group-hover:text-[#4F7C82] group-hover:gap-3 transition-all">
+              View Submissions <ArrowRight size={14} />
+            </span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Creator Toolkit */}
+      <div className="bg-white border border-[#E8E0D0] rounded-2xl p-8 shadow-md">
+        <div className="flex justify-between items-center pb-5 border-b border-[#E8E0D0] mb-6">
+          <div>
+            <h2 className="text-[#2D2416] font-black text-base flex items-center gap-2">
+              <Wrench size={18} className="text-[#4F7C82]" /> Creator Toolkit
+            </h2>
+            <p className="text-[#8B7355] text-xs font-medium mt-1">Free tools to power your creative workflow</p>
+          </div>
+          <Link href="/toolkit" className="text-[#4F7C82] text-xs font-black uppercase tracking-wider hover:text-[#C89B5A] transition-colors flex items-center gap-1 flex-shrink-0">
+            Explore All <ChevronRight size={14} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {toolkitItems.map(({ label, Icon, accent, desc }) => (
+            <Link key={label} href="/toolkit" className="no-underline group">
+              <div className="flex flex-col items-center gap-3 p-6 rounded-xl bg-[#F8F5EF] border border-[#E8E0D0] hover:border-[#C89B5A] hover:bg-white transition-all text-center">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white border border-[#E8E0D0]">
+                  <Icon size={18} style={{ color: accent }} />
+                </div>
                 <div>
-                  <p style={{ color: cat.color, fontWeight: '600', fontSize: '13px', margin: '0 0 4px' }}>{cat.name}</p>
-                  <span style={{ background: cat.color, color: 'white', fontSize: '10px', padding: '2px 8px', borderRadius: '20px', fontWeight: 'bold' }}>Start Course</span>
+                  <p className="text-[#2D2416] font-bold text-xs mb-0.5 group-hover:text-[#C89B5A] transition-colors">{label}</p>
+                  <p className="text-[#8B7355] text-[10px] font-medium">{desc}</p>
                 </div>
               </div>
             </Link>
@@ -84,73 +178,19 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* AI Guide + Assessments Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-        {/* AI Guide */}
-        <Link href="/ai-tutor" style={{ textDecoration: 'none' }}>
-          <div style={{ background: 'linear-gradient(135deg, #10B981, #059669)', borderRadius: '20px', padding: '24px', color: 'white', height: '100%' }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🤖</div>
-            <h3 style={{ fontWeight: 'bold', fontSize: '16px', margin: '0 0 8px' }}>Bearilly AI Guide</h3>
-            <p style={{ opacity: 0.85, fontSize: '13px', margin: '0 0 16px', lineHeight: 1.5 }}>
-              Hello I&apos;m Bearilly AI. Ask me anything about the app or your courses.
-            </p>
-            <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '10px 16px', fontSize: '13px', fontWeight: 'bold' }}>
-              Chat Now →
+      {/* Profile Strip */}
+      <Link href="/profile" className="no-underline block group">
+        <div className="bg-white border border-[#E8E0D0] rounded-2xl p-7 flex items-center justify-between hover:border-[#C89B5A] hover:shadow-md transition-all">
+          <div className="flex items-center gap-5 min-w-0">
+            <div className="w-12 h-12 bg-[#F8F5EF] border border-[#E8E0D0] rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+              <User size={20} className="text-[#C89B5A]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[#2D2416] font-black text-sm mb-1">My Profile</p>
+              <p className="text-[#8B7355] text-xs font-medium">View your completed courses and manage your credentials.</p>
             </div>
           </div>
-        </Link>
-
-        {/* Assessments */}
-        <Link href="/assessments" style={{ textDecoration: 'none' }}>
-          <div style={{ background: 'linear-gradient(135deg, #F0A500, #f59e0b)', borderRadius: '20px', padding: '24px', color: 'white', height: '100%' }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>📝</div>
-            <h3 style={{ fontWeight: 'bold', fontSize: '16px', margin: '0 0 8px' }}>Assessment Center</h3>
-            <p style={{ opacity: 0.85, fontSize: '13px', margin: '0 0 16px', lineHeight: 1.5 }}>
-              Take tests after completing courses. Each test is 20 questions in 5 minutes.
-            </p>
-            <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '10px 16px', fontSize: '13px', fontWeight: 'bold' }}>
-              View Tests →
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Opportunities */}
-      <div style={{ background: 'white', borderRadius: '20px', padding: '24px', marginBottom: '24px', border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <h2 style={{ fontWeight: 'bold', color: '#1E293B', fontSize: '18px', margin: 0 }}>🌟 Opportunities</h2>
-          <Link href="/toolkit" style={{ color: '#8B5CF6', fontSize: '13px', textDecoration: 'none', fontWeight: '600' }}>Explore →</Link>
-        </div>
-        <p style={{ color: '#64748b', fontSize: '14px', margin: '0 0 20px' }}>Here are awesome opportunities for you 😊</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
-          {[
-            { label: 'Organizations', emoji: '🏢', color: '#667eea', bg: '#F0F0FF', desc: 'Companies and institutions' },
-            { label: 'Internships', emoji: '💼', color: '#10B981', bg: '#F0FFF8', desc: 'Real-world work experience' },
-            { label: 'Competitions', emoji: '🏆', color: '#F0A500', bg: '#FFFBF0', desc: 'Contests and challenges' },
-            { label: 'Programs', emoji: '🎓', color: '#8B5CF6', bg: '#F5F0FF', desc: 'Scholarships and fellowships' },
-          ].map((opp) => (
-            <Link key={opp.label} href="/toolkit" style={{ textDecoration: 'none' }}>
-              <div style={{ background: opp.bg, borderRadius: '14px', padding: '16px', border: `1px solid ${opp.color}20`, textAlign: 'center' }}>
-                <div style={{ fontSize: '28px', marginBottom: '8px' }}>{opp.emoji}</div>
-                <p style={{ color: opp.color, fontWeight: 'bold', fontSize: '13px', margin: '0 0 4px' }}>{opp.label}</p>
-                <p style={{ color: '#64748b', fontSize: '11px', margin: 0 }}>{opp.desc}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Progress / Profile strip */}
-      <Link href="/profile" style={{ textDecoration: 'none' }}>
-        <div style={{ background: 'linear-gradient(135deg, #1E3A5F, #2E75B6)', borderRadius: '20px', padding: '24px', color: 'white', display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={{ width: '56px', height: '56px', background: '#F0A500', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
-            👤
-          </div>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontWeight: 'bold', fontSize: '16px', margin: '0 0 4px' }}>My Profile & Progress</p>
-            <p style={{ opacity: 0.8, fontSize: '13px', margin: 0 }}>View your completed courses, active courses and progress</p>
-          </div>
-          <span style={{ fontSize: '24px', opacity: 0.7 }}>→</span>
+          <ArrowRight size={18} className="text-[#E8E0D0] group-hover:text-[#C89B5A] transition-colors flex-shrink-0 ml-4" />
         </div>
       </Link>
 

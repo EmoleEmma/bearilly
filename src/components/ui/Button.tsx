@@ -2,32 +2,35 @@ import { clsx } from 'clsx'
 
 type ButtonProps = {
   children: React.ReactNode
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   fullWidth?: boolean
   loading?: boolean
   disabled?: boolean
   type?: 'button' | 'submit' | 'reset'
   onClick?: () => void
+  className?: string
 }
 
 export default function Button({
   children, variant = 'primary', size = 'md',
   fullWidth = false, loading = false, disabled = false,
-  type = 'button', onClick,
+  type = 'button', onClick, className,
 }: ButtonProps) {
   return (
     <button
       type={type} onClick={onClick} disabled={disabled || loading}
       className={clsx(
-        'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
-        variant === 'primary' && 'bg-[#1E3A5F] text-white hover:bg-[#2E75B6] focus:ring-[#1E3A5F]',
-        variant === 'secondary' && 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50',
-        variant === 'danger' && 'bg-red-600 text-white hover:bg-red-700',
-        variant === 'ghost' && 'text-primary hover:bg-blue-50',
-        size === 'sm' && 'text-sm px-3 py-1.5',
-        size === 'md' && 'text-sm px-4 py-2.5',
-        size === 'lg' && 'text-base px-6 py-3',
+        'inline-flex items-center justify-center font-semibold transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white',
+        className,
+        variant === 'primary' && 'rounded-full bg-user-teal text-white hover:bg-user-accent shadow-sm hover:shadow-md',
+        variant === 'secondary' && 'rounded-full bg-user-accent text-white hover:bg-user-teal shadow-sm hover:shadow-md',
+        variant === 'outline' && 'rounded-full border-2 border-user-teal text-user-teal bg-transparent hover:bg-user-teal hover:text-white',
+        variant === 'danger' && 'rounded-lg bg-[#EF4444] text-white hover:bg-[#dc3737] focus:ring-[#EF4444]',
+        variant === 'ghost' && 'rounded-lg text-user-muted hover:bg-user-surface hover:text-user-text',
+        size === 'sm' && 'text-xs px-4 py-2',
+        size === 'md' && 'text-sm px-5 py-2.5',
+        size === 'lg' && 'text-base px-7 py-3',
         fullWidth && 'w-full',
         (disabled || loading) && 'opacity-50 cursor-not-allowed',
       )}

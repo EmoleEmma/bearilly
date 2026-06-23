@@ -1,11 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { Bot, Send, Sparkles } from 'lucide-react'
 
-type Message = {
-  role: 'user' | 'assistant'
-  text: string
-}
+type Message = { role: 'user' | 'assistant'; text: string }
 
 const SUGGESTED = [
   'How do I start a lesson?',
@@ -17,10 +15,7 @@ const SUGGESTED = [
 
 export default function AITutorPage() {
   const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      text: "Hi! I'm Bearilly AI Guide 🐻 I'm here to help you navigate the platform and answer your learning questions. What would you like to know?"
-    }
+    { role: 'assistant', text: "Hi! I'm Bearilly AI Guide. I'm here to help you navigate the platform and answer your learning questions. What would you like to know?" }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -52,15 +47,8 @@ export default function AITutorPage() {
           history: history.map(m => ({ role: m.role, text: m.text }))
         })
       })
-
       const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong.')
-        setLoading(false)
-        return
-      }
-
+      if (!res.ok) { setError(data.error || 'Something went wrong.'); setLoading(false); return }
       setMessages(prev => [...prev, { role: 'assistant', text: data.reply }])
       setRemaining(data.remaining)
     } catch {
@@ -71,27 +59,37 @@ export default function AITutorPage() {
   }
 
   return (
-    <div style={{ maxWidth: '700px', margin: '0 auto', height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
+    <div className="max-w-3xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 110px)' }}>
 
-      {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #10B981, #059669)', borderRadius: '20px', padding: '20px 24px', marginBottom: '16px', color: 'white', display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div style={{ fontSize: '40px' }}>🤖</div>
-        <div>
-          <h1 style={{ fontWeight: 'bold', fontSize: '20px', margin: '0 0 4px' }}>Bearilly AI Guide</h1>
-          <p style={{ opacity: 0.85, fontSize: '13px', margin: 0 }}>
-            {remaining !== null ? `${remaining} messages left today` : 'Ask me anything about the platform or your courses'}
-          </p>
+      {/* Header Panel — teal gradient */}
+      <div
+        className="rounded-2xl p-4 mb-4 flex items-center justify-between shadow-md"
+        style={{ background: 'linear-gradient(135deg, #4F7C82 0%, #3a5f64 100%)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 bg-white/15 rounded-full flex items-center justify-center flex-shrink-0 text-2xl">
+            🐻
+          </div>
+          <div>
+            <h1 className="text-white font-extrabold text-sm tracking-tight">Bearilly AI Interface</h1>
+            <p className="text-white/70 text-xs font-medium">
+              {remaining !== null ? `${remaining} requests remaining today` : 'Curriculum & navigation assistance protocol'}
+            </p>
+          </div>
+        </div>
+        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C89B5A] text-[10px] font-bold uppercase tracking-wider text-white">
+          <Sparkles size={10} /> Active Node
         </div>
       </div>
 
-      {/* Suggested questions — only show at start */}
+      {/* Suggested Chips — horizontal scrollable, outlined teal */}
       {messages.length === 1 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
           {SUGGESTED.map(q => (
             <button
               key={q}
               onClick={() => sendMessage(q)}
-              style={{ background: '#F0FFF8', border: '1px solid #10B98130', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', color: '#059669', cursor: 'pointer', fontWeight: '500' }}
+              className="flex-shrink-0 bg-white border-2 border-[#4F7C82]/30 text-[#4F7C82] text-xs font-semibold px-3.5 py-2 rounded-full hover:border-[#4F7C82] hover:bg-[#4F7C82] hover:text-white transition-all duration-200 ease-in-out whitespace-nowrap"
             >
               {q}
             </button>
@@ -99,39 +97,44 @@ export default function AITutorPage() {
         </div>
       )}
 
-      {/* Chat messages */}
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '8px' }}>
-        {messages.map((msg, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-            {msg.role === 'assistant' && (
-              <div style={{ width: '32px', height: '32px', background: '#10B981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0, marginRight: '8px', alignSelf: 'flex-end' }}>
-                🤖
+      {/* Message Scroller — cream background */}
+      <div className="flex-1 overflow-y-auto flex flex-col gap-4 pb-4 pr-1 px-2 -mx-2 bg-[#FAF7F2] rounded-2xl pt-4 scrollbar-thin">
+        {messages.map((msg, i) => {
+          const isUser = msg.role === 'user'
+          return (
+            <div key={i} className={`flex items-start gap-3 px-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
+              {!isUser && (
+                <div className="w-8 h-8 rounded-full bg-[#4F7C82] flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
+                  <Bot size={15} className="text-white" />
+                </div>
+              )}
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm font-medium leading-relaxed whitespace-pre-wrap shadow-sm ${
+                  isUser
+                    ? 'bg-[#C89B5A] text-white rounded-tr-sm'
+                    : 'bg-white text-slate-800 rounded-tl-sm'
+                }`}
+              >
+                {msg.text}
               </div>
-            )}
-            <div style={{
-              maxWidth: '75%',
-              background: msg.role === 'user' ? '#10B981' : 'white',
-              color: msg.role === 'user' ? 'white' : '#1E293B',
-              borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-              padding: '12px 16px',
-              fontSize: '14px',
-              lineHeight: 1.6,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              border: msg.role === 'assistant' ? '1px solid #E2E8F0' : 'none',
-              whiteSpace: 'pre-wrap',
-            }}>
-              {msg.text}
             </div>
-          </div>
-        ))}
+          )
+        })}
 
+        {/* Typing State Indicator */}
         {loading && (
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-            <div style={{ width: '32px', height: '32px', background: '#10B981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>🤖</div>
-            <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: '18px 18px 18px 4px', padding: '12px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <div className="flex items-start gap-3 px-2">
+            <div className="w-8 h-8 rounded-full bg-[#4F7C82] flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Bot size={15} className="text-white" />
+            </div>
+            <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-4 shadow-sm">
+              <div className="flex gap-1.5 items-center">
                 {[0, 1, 2].map(i => (
-                  <div key={i} style={{ width: '6px', height: '6px', background: '#10B981', borderRadius: '50%', animation: `bounce 1s infinite ${i * 0.2}s` }} />
+                  <div
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full bg-[#C89B5A]"
+                    style={{ animation: `bounce 1s infinite ${i * 0.2}s` }}
+                  />
                 ))}
               </div>
             </div>
@@ -139,7 +142,7 @@ export default function AITutorPage() {
         )}
 
         {error && (
-          <div style={{ background: '#FFF0F0', border: '1px solid #EF444430', borderRadius: '12px', padding: '10px 14px', fontSize: '13px', color: '#EF4444', textAlign: 'center' }}>
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs font-semibold text-red-600 text-center shadow-sm mx-2">
             {error}
           </div>
         )}
@@ -147,63 +150,37 @@ export default function AITutorPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input area */}
-      <div style={{ paddingTop: '12px', borderTop: '1px solid #E2E8F0' }}>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+      {/* Chat Input Dock */}
+      <div className="pt-4 px-1">
+        <div className="flex gap-3 items-center bg-[#FAF7F2] rounded-full p-2 pl-5 focus-within:ring-2 focus-within:ring-[#4F7C82] shadow-sm transition-all duration-200 ease-in-out">
           <textarea
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                sendMessage(input)
-              }
+              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) }
             }}
-            placeholder="Ask me anything..."
+            placeholder="Query workspace parameters..."
             rows={1}
-            style={{
-              flex: 1,
-              border: '2px solid #E2E8F0',
-              borderRadius: '14px',
-              padding: '12px 16px',
-              fontSize: '14px',
-              resize: 'none',
-              outline: 'none',
-              fontFamily: 'inherit',
-              lineHeight: 1.5,
-            }}
+            className="flex-1 bg-transparent px-1 py-1.5 text-sm text-slate-800 placeholder-[#8B7355]/60 resize-none focus:outline-none min-h-[36px] max-h-[120px] font-medium"
           />
           <button
             onClick={() => sendMessage(input)}
             disabled={loading || !input.trim()}
-            style={{
-              background: loading || !input.trim() ? '#E2E8F0' : '#10B981',
-              color: loading || !input.trim() ? '#94a3b8' : 'white',
-              border: 'none',
-              borderRadius: '14px',
-              width: '48px',
-              height: '48px',
-              fontSize: '20px',
-              cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              transition: 'background 0.2s',
-            }}
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out disabled:opacity-30 disabled:cursor-not-allowed text-white shadow-sm"
+            style={{ background: loading || !input.trim() ? '#CBD5E1' : '#4F7C82' }}
           >
-            ➤
+            <Send size={14} />
           </button>
         </div>
-        <p style={{ color: '#94a3b8', fontSize: '11px', margin: '8px 0 0', textAlign: 'center' }}>
-          Press Enter to send · Shift+Enter for new line · 20 messages per day
+        <p className="text-[#8B7355]/70 text-[10px] font-semibold uppercase tracking-wider text-center mt-2.5">
+          Return Key Executes · Shift+Return Adds Break · Cap Limit: 20 Per Cycle
         </p>
       </div>
 
       <style>{`
         @keyframes bounce {
           0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
+          30% { transform: translateY(-4px); }
         }
       `}</style>
     </div>

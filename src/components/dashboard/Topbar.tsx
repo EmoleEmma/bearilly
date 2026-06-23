@@ -12,38 +12,34 @@ export default function Topbar({ onMenuClick, title }: TopbarProps) {
   const [hasNotification] = useState(true)
 
   return (
-    <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 shadow-sm">
-      {/* Mobile hamburger menu */}
+    <header className="sticky top-0 z-30 bg-[#FAF7F2] border-b border-[#E8E0D0] px-6 py-3.5 flex items-center gap-4 shadow-sm">
       <button
         onClick={onMenuClick}
-        className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+        className="lg:hidden p-2 rounded-xl hover:bg-[#F0E8D8] text-[#8B7355] hover:text-[#2D2416] transition-colors border border-transparent hover:border-[#E8E0D0]"
         aria-label="Open menu"
       >
         <Menu size={20} />
       </button>
 
-      {/* Bearilly logo text — shown on mobile when sidebar is closed */}
-      <span className="font-bold text-[#1E3A5F] text-lg lg:hidden">
+      <span className="font-black text-[#2D2416] text-xl lg:hidden tracking-tight flex items-center gap-1">
+        <span className="w-2 h-4 bg-[#C89B5A] rounded-sm block"></span>
         Bearilly
       </span>
 
-      {/* Page title — shown on desktop */}
       {title && (
-        <h2 className="font-semibold text-gray-900 text-sm hidden lg:block">
+        <h2 className="font-extrabold text-[#2D2416] text-base hidden lg:block tracking-tight">
           {title}
         </h2>
       )}
 
-      {/* Spacer */}
       <div className="ml-auto flex items-center gap-2">
-        {/* Notification bell */}
         <button
-          className="relative p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+          className="relative p-2 rounded-xl hover:bg-[#F0E8D8] text-[#8B7355] hover:text-[#2D2416] transition-colors border border-transparent hover:border-[#E8E0D0]"
           aria-label="Notifications"
         >
           <Bell size={20} />
           {hasNotification && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
           )}
         </button>
       </div>

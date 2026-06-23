@@ -9,7 +9,7 @@ type CardProps = {
 export default function Card({ children, className, padding = 'md' }: CardProps) {
   return (
     <div className={clsx(
-      'bg-white rounded-xl border border-gray-200 shadow-sm',
+      'bg-user-card rounded-xl shadow-md hover:shadow-lg transition-all duration-200 ease-in-out border border-user-border/60',
       padding === 'sm' && 'p-4',
       padding === 'md' && 'p-6',
       padding === 'lg' && 'p-8',
