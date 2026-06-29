@@ -65,39 +65,62 @@ export async function POST(request: Request) {
       }
     ]
 
-    // Call Groq API
-    const groqRes = await fetch(
-      'https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages,
-          temperature: 0.7,
-          max_tokens: 500,
-        })
-      }
-    )
+    // Call Groq API (primary)
+    let reply: string | null = null
+
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages,
+        temperature: 0.7,
+        max_tokens: 500,
+      })
+    })
 
     const groqData = await groqRes.json()
 
-    if (!groqRes.ok) {
-  console.error('Groq error:', groqData)
+    if (groqRes.ok) {
+      reply = groqData.choices?.[0]?.message?.content ?? null
+    } else {
+      console.warn('Groq failed, falling back to Gemini. Status:', groqRes.status, groqData)
+    }
 
-  // Catch quota/rate limit errors specifically
-  if (groqRes.status === 429) {
-    return NextResponse.json({ 
-      error: 'AI is busy right now. Please wait a moment and try again.' 
-    }, { status: 500 })
-  }
+    // Fallback to Gemini if Groq failed or returned no reply
+    if (!reply) {
+      const geminiMessages = messages
+        .filter(m => m.role !== 'system')
+        .map((m: { role: string; content: string }) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        }))
 
-  return NextResponse.json({ error: 'AI service error. Please try again.' }, { status: 500 })
-}
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: geminiMessages,
+            generationConfig: { temperature: 0.7, maxOutputTokens: 500 }
+          })
+        }
+      )
 
-    const reply = groqData.choices?.[0]?.message?.content
+      const geminiData = await geminiRes.json()
+
+      if (!geminiRes.ok) {
+        console.error('Gemini error:', geminiData)
+        return NextResponse.json({ error: 'AI service error. Please try again.' }, { status: 500 })
+      }
+
+      reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? null
+    }
 
     if (!reply) {
       return NextResponse.json({ error: 'No response from AI. Please try again.' }, { status: 500 })
