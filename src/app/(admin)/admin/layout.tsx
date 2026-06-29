@@ -1,9 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { clsx } from 'clsx'
-import { Users, BarChart3, ClipboardList, FolderOpen, LayoutDashboard, Trophy } from 'lucide-react'
+import { Users, BarChart3, ClipboardList, FolderOpen, LayoutDashboard, Trophy, Menu, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 type AdminItem = {
@@ -22,15 +23,19 @@ const adminNav: AdminItem[] = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#EEF1F4' }}>
       {/* Admin Header */}
       <header className="px-6 py-4 flex items-center justify-between border-b" style={{ backgroundColor: '#334155', borderColor: '#1E293B' }}>
       {/* Ensure child text inside header is updated to look crisp on slate dark background */}
+      <div className="flex items-center gap-3">
+      <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg text-gray-300 hover:text-white hover:bg-slate-600 transition-colors" aria-label="Open menu"><Menu size={20} /></button>
       <div>
       <h1 className="font-bold text-lg text-white">Bearilly Admin</h1>
       <p className="text-gray-300 text-xs">Platform Management</p>
+      </div>
       </div>
       <Link href="/dashboard" className="text-gray-300 hover:text-white text-sm transition-colors">
       ← Back to Platform
@@ -38,8 +43,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </header>
 
       <div className="flex">
+        {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />}
         {/* Admin Sidebar */}
-        <aside className="w-56 min-h-screen p-3 border-r" style={{ backgroundColor: '#1E293B', borderColor: '#334155' }}>
+        <aside className={`fixed top-0 left-0 h-full w-56 p-3 border-r z-40 transition-transform duration-300 md:static md:translate-x-0 md:z-auto md:min-h-screen ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ backgroundColor: '#1E293B', borderColor: '#334155' }}>
+        <div className="flex justify-end mb-2 md:hidden"><button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-slate-700 transition-colors"><X size={18} /></button></div>
           <nav className="space-y-1">
             {adminNav.map(({ label, href, icon: Icon }) => {
               const active = pathname === href
@@ -47,6 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={href}
                   href={href}
+                  onClick={() => setSidebarOpen(false)}
                   className={clsx(
                     'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
                     active

@@ -13,8 +13,9 @@ import {
   LogOut,
   X,
   Loader2,
+  BarChart3,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useUser } from '@/hooks/useUser'
 
@@ -37,8 +38,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter()
   const { user, loading } = useUser()
   const [signingOut, setSigningOut] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const fullName = user?.user_metadata?.full_name ?? ''
+
+  useEffect(() => {
+    if (!user) return
+    const supabase = createClient()
+    supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.role === 'admin') setIsAdmin(true)
+      })
+  }, [user])
   const email = user?.email ?? ''
   const initial = fullName ? fullName[0].toUpperCase() : email ? email[0].toUpperCase() : 'U'
   const displayName = fullName || email || 'User'
@@ -129,6 +144,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="border-t border-white/20 h-px" />
 
         <div className="px-3 py-4 space-y-1">
+          {isAdmin && (
+            <Link
+              href="/admin"
+              onClick={onClose}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-white/75 hover:bg-white/15 hover:text-white"
+            >
+              <BarChart3 size={17} className="text-white/50" />
+              <span>Admin Panel</span>
+            </Link>
+          )}
           <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest px-4 pb-1">
             Account
           </p>
