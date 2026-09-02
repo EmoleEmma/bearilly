@@ -2,6 +2,7 @@ import Link from 'next/link'
 import {
   Bot, BookOpen, ClipboardList, BarChart2, Sparkles, ShieldCheck, Clock,
 } from 'lucide-react'
+<script src="https://cdn.stakecut.com/pixel/pixel.min.js"></script>
 
 export const metadata = {
   title: 'Bearilly — Learn Anything, Your Way',
