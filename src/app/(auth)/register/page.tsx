@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
@@ -113,8 +113,10 @@ function PasswordInput({
   )
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const preselectedTrack = searchParams.get('track') || ''
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [redirectTo, setRedirectTo] = useState('')
@@ -141,14 +143,27 @@ export default function RegisterPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName: form.fullName, email: form.email, password: form.password }),
+        body: JSON.stringify({
+          fullName: form.fullName,
+          email: form.email,
+          password: form.password,
+          track: preselectedTrack || undefined,
+        }),
       })
-      const data = await res.json()
+            const data = await res.json()
       if (data.error) {
         setError(data.error)
         if (data.redirectTo) setRedirectTo(data.redirectTo)
       } else {
-        router.push(`/payment?email=${encodeURIComponent(form.email)}`)
+        // Account is created and already verified — sign in immediately
+        // and go straight to payment (with track carried through if set).
+        const { signInUser } = await import('@/lib/supabase/auth')
+        await signInUser({ email: form.email, password: form.password })
+
+        const dest = preselectedTrack
+          ? `/payment?school=${encodeURIComponent(preselectedTrack)}`
+          : '/payment'
+        router.push(dest)
       }
     } catch {
       setError('Something went wrong. Please try again.')
@@ -164,9 +179,11 @@ export default function RegisterPage() {
   return (
     <div onKeyDown={handleKeyDown}>
       <div className="mb-6">
-        <h2 className="text-3xl font-black text-[#1E293B] tracking-tight mb-1">Join 2,000+ Creators</h2>
+        <h2 className="text-3xl font-black text-[#1E293B] tracking-tight mb-1">Join 2,000+ Learners</h2>
         <p className="text-sm font-medium text-[#8B7355]">
-          Register first, then complete payment to unlock full access.
+          {preselectedTrack
+            ? 'Register first, then complete payment to unlock full access.'
+            : 'Register first, then choose a track and complete payment to unlock full access.'}
         </p>
       </div>
 
@@ -203,5 +220,12 @@ export default function RegisterPage() {
         </Link>
       </p>
     </div>
+  )
+}
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-8 text-admin-slate/60 text-sm font-semibold animate-pulse">Loading...</div>}>
+      <RegisterForm />
+    </Suspense>
   )
 }

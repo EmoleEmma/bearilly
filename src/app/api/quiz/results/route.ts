@@ -36,14 +36,14 @@ export async function GET(req: NextRequest) {
       let rows: Record<string, unknown>[] = []
       const full = await adminClient
         .from('quiz_results')
-        .select(`id, category, score, total, passed, attempt_number, taken_at, user_id, profiles:user_id (full_name, email)`)
+        .select(`id, category, score, total, passed, attempt_number, taken_at, user_id, profiles:user_id (full_name, email, school_id)`)
         .order('taken_at', { ascending: false })
 
       if (full.error?.code === '42703' || full.error?.code === 'PGRST204') {
         // Column missing — fetch without it
         const fallback = await adminClient
           .from('quiz_results')
-          .select(`id, category, score, total, passed, taken_at, user_id, profiles:user_id (full_name, email)`)
+          .select(`id, category, score, total, passed, taken_at, user_id, profiles:user_id (full_name, email, school_id)`)
           .order('taken_at', { ascending: false })
         rows = (fallback.data || []) as Record<string, unknown>[]
       } else if (full.error) {
@@ -53,7 +53,13 @@ export async function GET(req: NextRequest) {
         rows = (full.data || []) as Record<string, unknown>[]
       }
 
-      return NextResponse.json({ results: rows.map(normalise) })
+      // Also send the track list so the frontend can label school_id → name
+      const { data: tracks } = await adminClient
+        .from('schools')
+        .select('id, name, slug')
+        .order('order_index')
+
+      return NextResponse.json({ results: rows.map(normalise), tracks: tracks || [] })
     }
 
     // Regular user

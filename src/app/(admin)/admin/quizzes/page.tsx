@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Trophy, Users, TrendingUp, Target, CheckCircle2, XCircle, RefreshCw } from 'lucide-react'
+import { Trophy, Users, TrendingUp, Target, CheckCircle2, XCircle, RefreshCw, ChevronDown } from 'lucide-react'
+
+type Track = { id: string; name: string; slug: string }
 
 type QuizResult = {
   id: string
@@ -15,6 +17,7 @@ type QuizResult = {
   profiles: {
     full_name: string
     email: string
+    school_id: string | null
   } | null
 }
 
@@ -30,6 +33,8 @@ type CategoryStat = {
 
 export default function AdminQuizzesPage() {
   const [results, setResults] = useState<QuizResult[]>([])
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [trackFilter, setTrackFilter] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'overview' | 'history'>('overview')
@@ -48,6 +53,7 @@ export default function AdminQuizzesPage() {
       }
       const json = await res.json()
       setResults(json.results || [])
+      setTracks(json.tracks || [])
     } catch (err: any) {
       console.error('Admin quiz results error:', err)
       setError(err.message || 'Could not load quiz results.')
@@ -56,18 +62,23 @@ export default function AdminQuizzesPage() {
     }
   }
 
+  // Scope everything to the selected track before computing any stats
+  const scopedResults = trackFilter === 'all'
+    ? results
+    : results.filter(r => r.profiles?.school_id === trackFilter)
+
   // Global stats
-  const totalAttempts = results.length
-  const totalPassed = results.filter(r => r.passed).length
-  const uniqueUsers = new Set(results.map(r => r.user_id)).size
+  const totalAttempts = scopedResults.length
+  const totalPassed = scopedResults.filter(r => r.passed).length
+  const uniqueUsers = new Set(scopedResults.map(r => r.user_id)).size
   const overallPassRate = totalAttempts > 0 ? Math.round((totalPassed / totalAttempts) * 100) : 0
-  const scores = results.map(r => Math.round((r.score / r.total) * 100))
+  const scores = scopedResults.map(r => Math.round((r.score / r.total) * 100))
   const overallAvg = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0
 
   // Per-category stats
-  const categories = Array.from(new Set(results.map(r => r.category))).sort()
+  const categories = Array.from(new Set(scopedResults.map(r => r.category))).sort()
   const categoryStats: CategoryStat[] = categories.map(cat => {
-    const catResults = results.filter(r => r.category === cat)
+    const catResults = scopedResults.filter(r => r.category === cat)
     const catScores = catResults.map(r => Math.round((r.score / r.total) * 100))
     const passed = catResults.filter(r => r.passed).length
     return {
@@ -83,14 +94,30 @@ export default function AdminQuizzesPage() {
 
   const filterOptions = ['All', ...categories]
   const filteredHistory = filterCategory === 'All'
-    ? results
-    : results.filter(r => r.category === filterCategory)
+    ? scopedResults
+    : scopedResults.filter(r => r.category === filterCategory)
 
   return (
     <div>
-      <div className="mb-7">
-        <h1 className="text-2xl font-bold text-white">Quiz Management</h1>
-        <p className="text-sm mt-1" style={{ color: '#94A3B8' }}>Analytics, attempts, and pass rates for all quizzes.</p>
+      <div className="mb-7 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Quiz Management</h1>
+          <p className="text-sm mt-1" style={{ color: '#94A3B8' }}>Analytics, attempts, and pass rates for all quizzes.</p>
+        </div>
+        <div className="relative w-full sm:w-56">
+          <select
+            value={trackFilter}
+            onChange={e => setTrackFilter(e.target.value)}
+            className="w-full appearance-none px-4 py-2.5 pr-9 rounded-lg text-sm font-semibold focus:outline-none focus:ring-1"
+            style={{ background: '#334155', border: '1px solid #475569', color: '#fff' }}
+          >
+            <option value="all">All tracks</option>
+            {tracks.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+          <ChevronDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#94A3B8' }} />
+        </div>
       </div>
 
       {/* Global stat chips */}

@@ -25,12 +25,27 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public routes
-  const publicRoutes = ['/', '/register', '/payment', '/login']
+  const publicRoutes = ['/', '/register', '/browse', '/payment', '/login', '/sell', '/thank-you', '/jv']
   if (publicRoutes.some(route => pathname === route || pathname.startsWith(route + '?'))) {
     return supabaseResponse
   }
 
   if (pathname.startsWith('/api')) return supabaseResponse
+
+  // Direct track landing pages (e.g. /chemistry) — a single path segment
+  // that isn't one of the app's own known routes is treated as public,
+  // since the [trackSlug] page itself does the real "does this track
+  // exist and is it active" check and 404s if not. Known top-level app
+  // routes (dashboard, admin, learn, etc.) are excluded so this never
+  // accidentally makes a protected page public.
+  const KNOWN_APP_ROUTES = new Set([
+    'dashboard', 'admin', 'learn', 'ai-tutor', 'assessments',
+    'toolkit', 'my-quizzes', 'profile',
+  ])
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments.length === 1 && !KNOWN_APP_ROUTES.has(segments[0])) {
+    return supabaseResponse
+  }
 
   const { data: { user } } = await supabase.auth.getUser()
 
