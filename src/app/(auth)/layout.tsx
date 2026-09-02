@@ -1,3 +1,5 @@
+'use client'
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex">
@@ -20,7 +22,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* Feature bullets */}
         <ul className="space-y-4 z-10 w-full max-w-xs">
           {[
-            '6 premium creator tracks',
+            '8+ AI-powered learning tracks',
             'Unlimited AI Tutor access',
             'Real assessment & project grading',
           ].map(item => (
@@ -37,7 +39,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* RIGHT PANEL — 60% warm cream */}
-      <div className="flex-1 bg-[#FAF7F2] flex flex-col items-center justify-center p-6 md:p-12 selection:bg-[#E7C997] selection:text-[#1E293B] overflow-y-auto">
+      <div className="flex-1 bg-[#FAF7F2] flex flex-col items-center justify-start md:justify-center p-6 md:p-12 selection:bg-[#E7C997] selection:text-[#1E293B] overflow-y-auto">
         {/* Mobile-only logo */}
         <div className="md:hidden mb-8 text-center">
           <h1 className="text-[#4F7C82] font-black text-3xl">🐻 Bearilly</h1>

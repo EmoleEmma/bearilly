@@ -4,8 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { clsx } from 'clsx'
-import { Users, BarChart3, ClipboardList, FolderOpen, LayoutDashboard, Trophy, Menu, X } from 'lucide-react'
+import { Users, BarChart3, ClipboardList, FolderOpen, LayoutDashboard, Trophy, Menu, X, Layers, FilePlus2, Settings } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { Inbox } from 'lucide-react'
 
 type AdminItem = {
   label: string
@@ -15,10 +16,14 @@ type AdminItem = {
 
 const adminNav: AdminItem[] = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard },
+  { label: 'Tracks', href: '/admin/tracks', icon: Layers },
+  { label: 'Manage Content', href: '/admin/content', icon: FilePlus2 },
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Quiz Management', href: '/admin/quizzes', icon: Trophy },
   { label: 'Assessments', href: '/admin/assessments', icon: ClipboardList },
   { label: 'Submissions', href: '/admin/submissions', icon: FolderOpen },
+  { label: 'Stakecut Claims', href: '/admin/claims', icon: Inbox },
+  { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -28,17 +33,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#EEF1F4' }}>
       {/* Admin Header */}
-      <header className="px-6 py-4 flex items-center justify-between border-b" style={{ backgroundColor: '#334155', borderColor: '#1E293B' }}>
+      <header className="px-4 sm:px-6 py-4 flex items-center justify-between border-b gap-2" style={{ backgroundColor: '#334155', borderColor: '#1E293B' }}>
       {/* Ensure child text inside header is updated to look crisp on slate dark background */}
-      <div className="flex items-center gap-3">
-      <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg text-gray-300 hover:text-white hover:bg-slate-600 transition-colors" aria-label="Open menu"><Menu size={20} /></button>
-      <div>
-      <h1 className="font-bold text-lg text-white">Bearilly Admin</h1>
-      <p className="text-gray-300 text-xs">Platform Management</p>
+      <div className="flex items-center gap-3 min-w-0">
+      <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg text-gray-300 hover:text-white hover:bg-slate-600 transition-colors shrink-0" aria-label="Open menu"><Menu size={20} /></button>
+      <div className="min-w-0">
+      <h1 className="font-bold text-lg text-white truncate">Bearilly Admin</h1>
+      <p className="text-gray-300 text-xs truncate hidden sm:block">Platform Management</p>
       </div>
       </div>
-      <Link href="/dashboard" className="text-gray-300 hover:text-white text-sm transition-colors">
-      ← Back to Platform
+      <Link href="/dashboard" className="text-gray-300 hover:text-white text-xs sm:text-sm transition-colors shrink-0 whitespace-nowrap">
+      <span className="hidden sm:inline">← Back to Platform</span>
+      <span className="sm:hidden">← Back</span>
       </Link>
       </header>
 
@@ -72,7 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Admin Content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 min-w-0 p-4 sm:p-6 overflow-x-hidden">{children}</main>
       </div>
     </div>
   )

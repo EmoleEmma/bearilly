@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { fullName, email, password } = await request.json()
+    const { fullName, email, password, track } = await request.json()
 
     if (!fullName || !email || !password) {
       return NextResponse.json(
@@ -21,7 +21,8 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient()
 
-    // Create the auth user
+    // email_confirm: true — account is created already verified.
+    // No confirmation email is sent, no verification step is required.
     const { data: authData, error: authError } =
       await supabase.auth.admin.createUser({
         email,
@@ -36,10 +37,6 @@ export async function POST(request: Request) {
         authError.message.toLowerCase().includes('already been registered') ||
         authError.message.toLowerCase().includes('already exists')
       ) {
-        // Check whether this existing account was ever activated.
-        // If not, the person abandoned before paying — send them to
-        // payment instead of telling them to log in (they can't get past
-        // login anyway since middleware blocks unactivated users).
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('is_activated, email')
@@ -76,24 +73,25 @@ export async function POST(request: Request) {
       )
     }
 
-    // Insert profile row — this is the footprint the activate route uses
+    // Insert profile row — this is the footprint the activate/payment route uses
     const { error: profileError } = await supabase
-    .from('profiles')
-    .upsert({
-      id: authData.user.id,
-      full_name: fullName,
-      email: email,
-      role: 'user',
-      is_activated: false,
-      payment_status: 'unpaid',
-    }, { onConflict: 'id', ignoreDuplicates: true })
+      .from('profiles')
+      .upsert({
+        id: authData.user.id,
+        full_name: fullName,
+        email: email,
+        role: 'user',
+        is_activated: false,
+        payment_status: 'unpaid',
+      }, { onConflict: 'id', ignoreDuplicates: true })
 
     if (profileError) {
       console.log('Profile insert error:', profileError)
-      // Don't fail — auth user was created, profile trigger may have already run
     }
 
-    return NextResponse.json({ success: true })
+    // No email verification step. Return success with the track (if any)
+    // so the frontend can redirect straight to payment.
+    return NextResponse.json({ success: true, track: track || null })
   } catch (err) {
     console.log('Register error:', err)
     return NextResponse.json(

@@ -17,7 +17,7 @@ export default function HomePage() {
           </span>
           <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-[#334155]">
             <Link href="/" className="hover:text-[#4F7C82] transition-colors">Home</Link>
-            <Link href="/login" className="hover:text-[#4F7C82] transition-colors">Courses</Link>
+            <Link href="/browse" className="hover:text-[#4F7C82] transition-colors">Courses</Link>
             <Link href="#" className="hover:text-[#4F7C82] transition-colors">About</Link>
           </div>
         </div>
@@ -42,20 +42,20 @@ export default function HomePage() {
               Premium Educational SaaS
             </span>
             <h1 className="text-3xl md:text-4xl font-black text-[#1E293B] tracking-tight leading-tight mb-6">
-              Learn to Create{' '}
+              Learn Anything,{' '}
               <span className="text-[#4F7C82] relative inline-block">
-                Amazing Content
+                Your Way
                 <span className="absolute -bottom-1 left-0 w-full h-1.5 bg-[#E7C997] rounded-full" />
               </span>
             </h1>
             <p className="text-[#334155]/80 text-lg md:text-xl max-w-xl mb-10 leading-relaxed font-medium">
-              The premium ecosystem for creators to master video, storytelling, branding, and monetization at their own pace.
+              A growing collection of AI-powered learning tracks — pick a subject, learn at your own pace, with an AI tutor by your side.
             </p>
             <div className="flex gap-4 items-center flex-wrap">
               <Link href="/register" className="bg-[#C89B5A] text-white text-base px-8 py-4 rounded-full font-bold shadow-lg hover:bg-[#4F7C82] hover:shadow-[0_6px_20px_rgba(200,155,90,0.35)] transition-all duration-200">
                 Get Started
               </Link>
-              <Link href="/login" className="text-[#4F7C82] border-2 border-[#4F7C82] text-base px-8 py-4 rounded-full font-bold hover:bg-[#4F7C82] hover:text-white transition-all duration-200">
+              <Link href="/browse" className="text-[#4F7C82] border-2 border-[#4F7C82] text-base px-8 py-4 rounded-full font-bold hover:bg-[#4F7C82] hover:text-white transition-all duration-200">
                 Explore Courses
               </Link>
             </div>
@@ -71,7 +71,7 @@ export default function HomePage() {
               </div>
               <div className="bg-[#FAF7F2] rounded-xl p-4 mb-3">
                 <p className="text-xs text-[#8B7355] font-bold uppercase tracking-wider mb-2">Current Track</p>
-                <p className="text-[#1E293B] font-black text-lg">Video Creation</p>
+                <p className="text-[#1E293B] font-black text-lg">Your Track</p>
                 <div className="mt-2 h-2 bg-[#EEF1F4] rounded-full"><div className="h-2 bg-[#4F7C82] rounded-full w-[68%]" /></div>
                 <p className="text-xs text-[#8B7355] mt-1 font-semibold">68% Complete</p>
               </div>
@@ -106,16 +106,16 @@ export default function HomePage() {
 
       {/* WHAT YOU LEARN */}
       <section className="bg-[#F8F5EF] px-8 py-20 text-center border-y border-[#EEF1F4]">
-        <h2 className="text-3xl md:text-4xl font-bold text-admin-deep tracking-tight mb-2">What You&apos;ll Learn</h2>
-        <p className="text-admin-teal font-bold mb-12 uppercase tracking-widest text-xs">6 specialized tracks with real-world skills</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-admin-deep tracking-tight mb-2">Pick a Track, Start Learning</h2>
+        <p className="text-admin-teal font-bold mb-12 uppercase tracking-widest text-xs">New tracks added regularly — here's a preview</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-xl mx-auto">
           {[
             { Icon: Camera,      title: 'Content Creation', accent: '#4F7C82' },
             { Icon: Smartphone,  title: 'Social Media',     accent: '#C89B5A' },
-            { Icon: Video,       title: 'Video Creation',   accent: '#4F7C82' },
+            { Icon: Video,       title: 'Video Editing',    accent: '#4F7C82' },
             { Icon: BookOpen,    title: 'Storytelling',     accent: '#C89B5A' },
-            { Icon: Palette,     title: 'Branding',         accent: '#4F7C82' },
-            { Icon: DollarSign,  title: 'Monetization',     accent: '#C89B5A' },
+            { Icon: Palette,     title: 'Design',           accent: '#4F7C82' },
+            { Icon: DollarSign,  title: 'Business',         accent: '#C89B5A' },
           ].map(({ Icon, title, accent }) => (
             <div key={title} className="bg-[#FFFFFF] border border-[#EEF1F4] rounded-2xl p-5 flex flex-col items-center gap-3 shadow-sm hover:shadow-md hover:border-user-gold/40 hover:-translate-y-1 transition-all duration-300 group">
               <div className="p-3 rounded-xl bg-[#FAF7F2] group-hover:bg-[#F8F5EF] transition-colors duration-200">
@@ -130,11 +130,11 @@ export default function HomePage() {
       {/* FEATURES */}
       <section className="bg-[#FFFFFF] px-8 py-12 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-admin-deep tracking-tight mb-2">Everything You Need</h2>
-        <p className="text-admin-teal font-bold mb-8 uppercase tracking-widest text-xs">Built for serious creators</p>
+        <p className="text-admin-teal font-bold mb-8 uppercase tracking-widest text-xs">Built for serious learners</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl mx-auto">
           {[
-            { Icon: Bot,          title: 'Bearilly AI Guide', desc: 'Ask any question and obtain instantaneous context-aware architectural feedback from your embedded AI companion.', accent: '#4F7C82' },
-            { Icon: Wrench,       title: 'Creator Toolkit',   desc: 'Deploy modular blueprints, dynamic elements, structured logs, and premium configurations instantly.', accent: '#C89B5A' },
+            { Icon: Bot,          title: 'Bearilly AI Guide', desc: 'Ask any question and obtain instantaneous context-aware feedback from your embedded AI companion.', accent: '#4F7C82' },
+            { Icon: Wrench,       title: 'Toolkit',           desc: 'Deploy modular blueprints, dynamic elements, structured logs, and premium configurations instantly.', accent: '#C89B5A' },
             { Icon: ClipboardList,title: 'Assessment Hub',    desc: 'Verify execution metrics by finalizing production benchmarks and submitting work to manual verification layers.', accent: '#4F7C82' },
             { Icon: BarChart2,    title: 'Analytics Engine',  desc: 'Monitor visual indicators, tracking parameters, execution metrics, and milestones cleanly over cycles.', accent: '#C89B5A' },
           ].map(({ Icon, title, desc, accent }) => (
@@ -176,9 +176,9 @@ export default function HomePage() {
         <p className="text-[#4F7C82] text-xs font-bold uppercase tracking-widest mb-12">Real stories from the Bearilly community</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
           {[
-            { name: 'Amaka O.', role: 'Content Creator', text: 'Bearilly transformed how I approach video content. The AI Tutor alone is worth every naira.', initial: 'A' },
-            { name: 'Tunde B.', role: 'Brand Strategist', text: 'The structured tracks gave me a clear path. I went from zero to launching my brand in 6 weeks.', initial: 'T' },
-            { name: 'Chidi N.', role: 'Filmmaker', text: 'I loved the assessment system — real feedback, not generic scores. Premium experience all the way.', initial: 'C' },
+            { name: 'Amaka O.', role: 'Creators Track', text: 'Bearilly transformed how I approach my craft. The AI Tutor alone is worth every naira.', initial: 'A' },
+            { name: 'Tunde B.', role: 'Design Track', text: 'The structured lessons gave me a clear path. I went from zero to confident in 6 weeks.', initial: 'T' },
+            { name: 'Chidi N.', role: 'Business Track', text: 'I loved the assessment system — real feedback, not generic scores. Premium experience all the way.', initial: 'C' },
           ].map(({ name, role, text, initial }) => (
             <div key={name} className="bg-white rounded-2xl shadow-md border border-[#EEF1F4] p-6 hover:shadow-lg transition-all duration-200">
               <span className="text-5xl text-[#C89B5A]/30 font-black leading-none block mb-2">"</span>
@@ -205,7 +205,7 @@ export default function HomePage() {
             {[
               { q: 'How much does Bearilly cost?', a: 'Access starts at ₦1,000/month — full platform, no hidden fees.' },
               { q: 'Can I access content on mobile?', a: 'Yes, Bearilly is fully responsive and works on any device.' },
-              { q: 'What tracks are available?', a: 'Content Creation, Social Media, Video, Storytelling, Branding, and Monetization.' },
+              { q: 'What tracks are available?', a: 'New tracks are added regularly — browse the current lineup after you sign up.' },
               { q: 'Is there an AI tutor included?', a: 'Yes — unlimited conversations with the Bearilly AI Tutor are included in your subscription.' },
             ].map(({ q, a }) => (
               <details key={q} className="group border border-[#EEF1F4] rounded-xl overflow-hidden">
@@ -224,7 +224,7 @@ export default function HomePage() {
       <section className="bg-[#1E293B] px-8 py-24 text-center text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#4F7C82_1px,transparent_1px)] [background-size:18px_18px] opacity-[0.07]"></div>
         <h2 className="text-3xl md:text-4xl font-black text-white mb-3 relative">Ready to Start Your Journey?</h2>
-        <p className="text-[#94A3B8] text-base max-w-md mx-auto mb-8 relative">Elevate your skills alongside a premium community of digital creators.</p>
+        <p className="text-[#94A3B8] text-base max-w-md mx-auto mb-8 relative">Join a growing community of learners, across every track.</p>
         <Link href="/register" className="bg-[#C89B5A] text-white text-base px-8 py-3.5 rounded-full font-bold shadow-lg hover:bg-[#B3874B] hover:scale-105 transition-all duration-200 inline-block relative">
           Join Bearilly — Sign Up Now
         </Link>
@@ -236,7 +236,7 @@ export default function HomePage() {
           <div className="md:col-span-1">
             <p className="text-[#C89B5A] font-black text-2xl mb-2">🐻 Bearilly</p>
             <p className="text-[#4F7C82] text-xs tracking-wider font-semibold uppercase mb-4">Learn. Create. Get Assessed.</p>
-            <p className="text-xs leading-relaxed text-[#64748B]">Premium educational platform for the next generation of digital creators.</p>
+            <p className="text-xs leading-relaxed text-[#64748B]">AI-powered learning tracks for the next generation of skilled learners.</p>
           </div>
           <div>
             <p className="text-[#F1F5F9] font-bold text-sm mb-4 uppercase tracking-wider">Platform</p>

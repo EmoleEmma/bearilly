@@ -1,0 +1,538 @@
+From 97122db0024a6f1860f9b1d215b44f3f0e207966 Mon Sep 17 00:00:00 2001
+From: Emmanuel <emole@bearilly.local>
+Date: Mon, 17 Aug 2026 11:28:04 +0000
+Subject: [PATCH] Add multi-school support: browse page, dynamic payment,
+ schools table
+
+- New schools table with per-school price/features (migration_add_schools.sql)
+- New /browse page for selecting a school after registration
+- Payment page now reads price/features dynamically instead of hardcoded values
+- Payment verify route checks real school price and saves school_id to profile
+- Register flow now redirects to /browse instead of straight to /payment
+---
+ src/app/(auth)/browse/page.tsx             | 117 ++++++++++++++++
+ src/app/(auth)/payment/page.tsx            |  77 ++++++++---
+ src/app/(auth)/register/page.tsx           |   2 +-
+ src/app/api/auth/register/route.ts         |   2 +-
+ src/app/api/payment/verify/route.ts        |  25 +++-
+ src/lib/supabase/migration_add_schools.sql | 150 +++++++++++++++++++++
+ 6 files changed, 349 insertions(+), 24 deletions(-)
+ create mode 100644 src/app/(auth)/browse/page.tsx
+ create mode 100644 src/lib/supabase/migration_add_schools.sql
+
+diff --git a/src/app/(auth)/browse/page.tsx b/src/app/(auth)/browse/page.tsx
+new file mode 100644
+index 0000000..9fccc03
+--- /dev/null
++++ b/src/app/(auth)/browse/page.tsx
+@@ -0,0 +1,117 @@
++'use client'
++
++import { Suspense, useEffect, useState } from 'react'
++import { useRouter, useSearchParams } from 'next/navigation'
++import { createClient } from '@/lib/supabase/client'
++
++type School = {
++  id: string
++  slug: string
++  name: string
++  tagline: string | null
++  price_kobo: number
++  features: string[]
++}
++
++function formatNaira(kobo: number) {
++  return `₦${(kobo / 100).toLocaleString('en-NG')}`
++}
++
++function BrowseContent() {
++  const router = useRouter()
++  const searchParams = useSearchParams()
++  const email = searchParams.get('email') || ''
++
++  const [schools, setSchools] = useState<School[]>([])
++  const [loading, setLoading] = useState(true)
++
++  useEffect(() => {
++    if (!email) router.push('/register')
++  }, [email, router])
++
++  useEffect(() => {
++    async function load() {
++      const supabase = createClient()
++      const { data, error } = await supabase
++        .from('schools')
++        .select('id, slug, name, tagline, price_kobo, features')
++        .eq('is_active', true)
++        .order('order_index')
++
++      if (!error && data) setSchools(data as School[])
++      setLoading(false)
++    }
++    load()
++  }, [])
++
++  function selectSchool(slug: string) {
++    router.push(`/payment?email=${encodeURIComponent(email)}&school=${slug}`)
++  }
++
++  if (!email) return null
++
++  return (
++    <div>
++      <div className="mb-6">
++        <h2 className="text-3xl font-black text-[#1E293B] tracking-tight mb-2">Choose Your School</h2>
++        <p className="text-sm font-medium text-[#8B7355]">
++          Pick the Bearilly track that fits you. You can only see content for the school you join.
++        </p>
++      </div>
++
++      {loading && (
++        <div className="space-y-3">
++          {[1, 2].map(i => (
++            <div key={i} className="h-32 bg-[#F8F5EF] rounded-xl animate-pulse" />
++          ))}
++        </div>
++      )}
++
++      {!loading && schools.length === 0 && (
++        <div className="text-center py-10 text-sm font-semibold text-admin-slate/60">
++          No schools are available right now. Please check back soon.
++        </div>
++      )}
++
++      <div className="space-y-4">
++        {schools.map(school => (
++          <button
++            key={school.id}
++            onClick={() => selectSchool(school.slug)}
++            className="w-full text-left bg-white border border-[#E8E0D0] rounded-xl p-5 transition-all hover:shadow-lg hover:border-[#C89B5A] group"
++          >
++            <div className="flex items-start justify-between gap-4">
++              <div className="flex-1">
++                <p className="font-black text-lg tracking-tight text-[#2D2416] group-hover:text-[#C89B5A] transition-colors">
++                  {school.name}
++                </p>
++                {school.tagline && (
++                  <p className="text-sm font-medium text-[#8B7355] mt-1">{school.tagline}</p>
++                )}
++                <ul className="mt-3 space-y-1">
++                  {(school.features || []).slice(0, 3).map(f => (
++                    <li key={f} className="text-xs font-semibold text-[#4F7C82] flex items-center gap-1.5">
++                      <span className="text-[10px]">●</span> {f}
++                    </li>
++                  ))}
++                </ul>
++              </div>
++              <div className="text-right shrink-0">
++                <p className="text-2xl font-black text-admin-teal">{formatNaira(school.price_kobo)}</p>
++                <p className="text-xs font-bold text-user-gold mt-0.5">Select →</p>
++              </div>
++            </div>
++          </button>
++        ))}
++      </div>
++    </div>
++  )
++}
++
++export default function BrowsePage() {
++  return (
++    <Suspense fallback={<div className="text-center py-8 text-admin-slate/60 text-sm font-semibold animate-pulse">Loading schools...</div>}>
++      <BrowseContent />
++    </Suspense>
++  )
++}
+diff --git a/src/app/(auth)/payment/page.tsx b/src/app/(auth)/payment/page.tsx
+index 537167c..356a849 100644
+--- a/src/app/(auth)/payment/page.tsx
++++ b/src/app/(auth)/payment/page.tsx
+@@ -3,6 +3,7 @@
+ import { Suspense, useEffect, useState } from 'react'
+ import { useRouter, useSearchParams } from 'next/navigation'
+ import Button from '@/components/ui/Button'
++import { createClient } from '@/lib/supabase/client'
+ 
+ declare global {
+   interface Window {
+@@ -10,16 +11,55 @@ declare global {
+   }
+ }
+ 
++type School = {
++  id: string
++  slug: string
++  name: string
++  description: string | null
++  price_kobo: number
++  features: string[]
++}
++
++function formatNaira(kobo: number) {
++  return `₦${(kobo / 100).toLocaleString('en-NG')}`
++}
++
+ function PaymentContent() {
+   const router = useRouter()
+   const searchParams = useSearchParams()
+   const email = searchParams.get('email') || ''
++  const schoolSlug = searchParams.get('school') || ''
++
++  const [school, setSchool] = useState<School | null>(null)
++  const [schoolLoading, setSchoolLoading] = useState(true)
+   const [loading, setLoading] = useState(false)
+   const [scriptReady, setScriptReady] = useState(false)
+ 
+   useEffect(() => {
+-    if (!email) router.push('/register')
+-  }, [email, router])
++    if (!email) { router.push('/register'); return }
++    if (!schoolSlug) { router.push(`/browse?email=${encodeURIComponent(email)}`); return }
++  }, [email, schoolSlug, router])
++
++  useEffect(() => {
++    if (!schoolSlug) return
++    async function load() {
++      const supabase = createClient()
++      const { data, error } = await supabase
++        .from('schools')
++        .select('id, slug, name, description, price_kobo, features')
++        .eq('slug', schoolSlug)
++        .eq('is_active', true)
++        .single()
++
++      if (error || !data) {
++        router.push(`/browse?email=${encodeURIComponent(email)}`)
++        return
++      }
++      setSchool(data as School)
++      setSchoolLoading(false)
++    }
++    load()
++  }, [schoolSlug, email, router])
+ 
+   useEffect(() => {
+     const existing = document.getElementById('paystack-script')
+@@ -32,16 +72,16 @@ function PaymentContent() {
+   }, [])
+ 
+   function handlePay() {
+-    if (!scriptReady || !window.PaystackPop) {
++    if (!scriptReady || !window.PaystackPop || !school) {
+       alert('Payment system still loading. Please try again.')
+       return
+     }
+-    const reference = `BEARILLY_${Date.now()}`
++    const reference = `BEARILLY_${school.slug.toUpperCase()}_${Date.now()}`
+     setLoading(true)
+     const handler = window.PaystackPop.setup({
+       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+       email,
+-      amount: 100000,
++      amount: school.price_kobo,
+       currency: 'NGN',
+       ref: reference,
+       callback: function(response: any) {
+@@ -49,7 +89,7 @@ function PaymentContent() {
+         fetch('/api/payment/verify', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+-          body: JSON.stringify({ reference: response.reference, email }),
++          body: JSON.stringify({ reference: response.reference, email, schoolId: school.id }),
+         })
+           .then(res => res.json())
+           .then(data => {
+@@ -73,25 +113,28 @@ function PaymentContent() {
+     handler.openIframe()
+   }
+ 
+-  if (!email) return null
++  if (!email || !schoolSlug) return null
++
++  if (schoolLoading || !school) {
++    return (
++      <div className="text-center py-8 text-admin-slate/60 text-sm font-semibold animate-pulse">
++        Loading school details...
++      </div>
++    )
++  }
+ 
+   return (
+     <div>
+       <div className="mb-6">
+         <h2 className="text-3xl font-black text-[#1E293B] tracking-tight mb-2">Complete Your Access</h2>
+         <p className="text-sm font-medium text-[#8B7355]">
+-          One payment unlocks the full Bearilly ecosystem — courses, AI Tutor, assessments & more.
++          {school.description || `One payment unlocks the full ${school.name} ecosystem.`}
+         </p>
+       </div>
+ 
+       {/* Package features */}
+       <div className="bg-[#1E293B] rounded-xl p-5 mb-6 space-y-3">
+-        {[
+-          '6 comprehensive course categories',
+-          'Full access to the Creator Toolkit',
+-          'Unlimited Bearilly AI Tutor conversations',
+-          'Real assessment grading and project tracking',
+-        ].map(item => (
++        {(school.features || []).map(item => (
+           <div key={item} className="flex items-start gap-3">
+             <div className="mt-0.5 w-4 h-4 rounded-full bg-[#4F7C82]/30 flex items-center justify-center text-[#4F7C82] shrink-0">
+               <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+@@ -118,8 +161,8 @@ function PaymentContent() {
+       {/* Price row */}
+       <div className="border border-[#C89B5A]/30 bg-[#F8F5EF] rounded-xl p-5 mb-6 flex items-center justify-between shadow-sm">
+         <div>
+-          <p className="text-xs font-bold text-admin-slate/60 uppercase tracking-wide">Total payment</p>
+-          <p className="text-3xl font-black text-admin-teal">₦1,000</p>
++          <p className="text-xs font-bold text-admin-slate/60 uppercase tracking-wide">{school.name}</p>
++          <p className="text-3xl font-black text-admin-teal">{formatNaira(school.price_kobo)}</p>
+           <p className="text-xs font-bold text-user-gold mt-0.5">Monthly access tier</p>
+         </div>
+         <div className="text-right">
+@@ -152,4 +195,4 @@ export default function PaymentPage() {
+       <PaymentContent />
+     </Suspense>
+   )
+-}
+\ No newline at end of file
++}
+diff --git a/src/app/(auth)/register/page.tsx b/src/app/(auth)/register/page.tsx
+index 3000b8a..c3e3219 100644
+--- a/src/app/(auth)/register/page.tsx
++++ b/src/app/(auth)/register/page.tsx
+@@ -148,7 +148,7 @@ export default function RegisterPage() {
+         setError(data.error)
+         if (data.redirectTo) setRedirectTo(data.redirectTo)
+       } else {
+-        router.push(`/payment?email=${encodeURIComponent(form.email)}`)
++        router.push(`/browse?email=${encodeURIComponent(form.email)}`)
+       }
+     } catch {
+       setError('Something went wrong. Please try again.')
+diff --git a/src/app/api/auth/register/route.ts b/src/app/api/auth/register/route.ts
+index 900b2fc..05ac837 100644
+--- a/src/app/api/auth/register/route.ts
++++ b/src/app/api/auth/register/route.ts
+@@ -51,7 +51,7 @@ export async function POST(request: Request) {
+             {
+               error:
+                 'You already started registration but have not completed payment yet. Please proceed to payment to activate your account.',
+-              redirectTo: '/payment',
++              redirectTo: '/browse',
+               email,
+             },
+             { status: 409 }
+diff --git a/src/app/api/payment/verify/route.ts b/src/app/api/payment/verify/route.ts
+index 2b8f510..0579ebc 100644
+--- a/src/app/api/payment/verify/route.ts
++++ b/src/app/api/payment/verify/route.ts
+@@ -4,10 +4,10 @@ import { NextResponse } from 'next/server'
+ 
+ export async function POST(request: Request) {
+   try {
+-    const { reference, email } = await request.json()
++    const { reference, email, schoolId } = await request.json()
+ 
+-    if (!reference || !email) {
+-      return NextResponse.json({ error: 'Reference and email are required' }, { status: 400 })
++    if (!reference || !email || !schoolId) {
++      return NextResponse.json({ error: 'Reference, email, and school are required' }, { status: 400 })
+     }
+ 
+     const paystackRes = await fetch(
+@@ -22,11 +22,25 @@ export async function POST(request: Request) {
+       return NextResponse.json({ error: 'Payment not successful' }, { status: 400 })
+     }
+ 
+-    if (paystackData.data?.amount < 100000) {
++    const supabase = createAdminClient()
++
++    // Look up the school's real price rather than trusting a hardcoded
++    // constant — this is what makes the amount check work for any school,
++    // not just the original ₦1,000 Creators tier.
++    const { data: school, error: schoolError } = await supabase
++      .from('schools')
++      .select('id, price_kobo')
++      .eq('id', schoolId)
++      .single()
++
++    if (schoolError || !school) {
++      return NextResponse.json({ error: 'School not found' }, { status: 404 })
++    }
++
++    if (paystackData.data?.amount < school.price_kobo) {
+       return NextResponse.json({ error: 'Incorrect payment amount' }, { status: 400 })
+     }
+ 
+-    const supabase = createAdminClient()
+     const cleanEmail = email.toLowerCase().trim()
+ 
+     const { data: updated, error: updateError } = await supabase
+@@ -35,6 +49,7 @@ export async function POST(request: Request) {
+         is_activated: true,
+         payment_status: 'paid',
+         payment_reference: reference,
++        school_id: school.id,
+       })
+       .eq('email', cleanEmail)
+       .select('id')
+diff --git a/src/lib/supabase/migration_add_schools.sql b/src/lib/supabase/migration_add_schools.sql
+new file mode 100644
+index 0000000..42b72d0
+--- /dev/null
++++ b/src/lib/supabase/migration_add_schools.sql
+@@ -0,0 +1,150 @@
++-- ============================================================
++-- BEARILLY — Multi-School Migration
++-- Run this in: Supabase Dashboard → SQL Editor → New Query
++-- Safe to run on top of the existing database.sql schema.
++-- ============================================================
++
++-- ── schools ───────────────────────────────────────────────────
++-- Each row is one purchasable "school" (e.g. Bearilly Creators,
++-- Bearilly Islamic Studies). Price is stored in kobo (NGN smallest
++-- unit) to match how Paystack already works in payment/page.tsx.
++create table if not exists public.schools (
++  id            uuid primary key default gen_random_uuid(),
++  slug          text not null unique,          -- e.g. 'creators', 'islamic-studies'
++  name          text not null,                 -- e.g. 'Bearilly Creators'
++  tagline       text,                           -- short one-liner for browse cards
++  description   text,                           -- longer copy for payment page
++  price_kobo    int  not null,                  -- e.g. 100000 = ₦1,000
++  features      jsonb not null default '[]'::jsonb,  -- array of strings, e.g. ["6 course categories", ...]
++  is_active     boolean not null default true,  -- controls whether it shows on /browse
++  order_index   int  not null default 0,
++  created_at    timestamptz not null default now()
++);
++
++alter table public.schools enable row level security;
++
++-- Anyone (even logged out, if you ever need that) can read active schools —
++-- this is public marketing info, same as a pricing page.
++create policy "schools: anyone reads active schools"
++  on public.schools for select
++  using (is_active = true);
++
++-- Admins can read all schools, including inactive ones
++create policy "schools: admin reads all"
++  on public.schools for select
++  using (
++    exists (
++      select 1 from public.profiles
++      where id = auth.uid() and role = 'admin'
++    )
++  );
++
++-- Seed the existing Bearilly Creators school so current users/content
++-- have somewhere to attach to. Adjust price/features to match what's
++-- currently hardcoded in payment/page.tsx before running in production.
++insert into public.schools (slug, name, tagline, description, price_kobo, features, order_index)
++values (
++  'creators',
++  'Bearilly Creators',
++  'For content creators, marketers & entrepreneurs',
++  'The original Bearilly — everything you need to grow as a creator, from content strategy to business skills.',
++  100000,
++  '["6 comprehensive course categories", "Full access to the Creator Toolkit", "Unlimited Bearilly AI Tutor conversations", "Real assessment grading and project tracking"]'::jsonb,
++  0
++)
++on conflict (slug) do nothing;
++
++-- ── profiles: add school_id ──────────────────────────────────
++alter table public.profiles
++  add column if not exists school_id uuid references public.schools(id);
++
++-- Backfill existing paid/activated users into the Creators school
++-- so they don't lose access when this migration runs.
++update public.profiles
++set school_id = (select id from public.schools where slug = 'creators')
++where school_id is null and is_activated = true;
++
++-- ── lessons, quizzes, assessments, tool_directory: add school_id ──
++alter table public.lessons        add column if not exists school_id uuid references public.schools(id);
++alter table public.assessments    add column if not exists school_id uuid references public.schools(id);
++alter table public.tool_directory add column if not exists school_id uuid references public.schools(id);
++
++-- Backfill all existing content into Creators school
++update public.lessons
++set school_id = (select id from public.schools where slug = 'creators')
++where school_id is null;
++
++update public.assessments
++set school_id = (select id from public.schools where slug = 'creators')
++where school_id is null;
++
++update public.tool_directory
++set school_id = (select id from public.schools where slug = 'creators')
++where school_id is null;
++
++-- Note: quizzes inherit school scoping through their lesson_id -> lessons.school_id,
++-- so no school_id column is needed on quizzes itself.
++
++-- ============================================================
++-- Updated RLS policies — scope content access to the user's school
++-- ============================================================
++
++-- Lessons: activated users read only their own school's lessons
++drop policy if exists "lessons: activated users read" on public.lessons;
++create policy "lessons: own school activated users read"
++  on public.lessons for select
++  using (
++    exists (
++      select 1 from public.profiles
++      where id = auth.uid()
++        and is_activated = true
++        and profiles.school_id = lessons.school_id
++    )
++  );
++
++-- Quizzes: activated users read quizzes belonging to lessons in their school
++drop policy if exists "quizzes: activated users read" on public.quizzes;
++create policy "quizzes: own school activated users read"
++  on public.quizzes for select
++  using (
++    exists (
++      select 1 from public.lessons
++      join public.profiles on profiles.id = auth.uid()
++      where lessons.id = quizzes.lesson_id
++        and profiles.is_activated = true
++        and profiles.school_id = lessons.school_id
++    )
++  );
++
++-- Assessments: activated users read only their own school's assessments
++drop policy if exists "assessments: activated users read" on public.assessments;
++create policy "assessments: own school activated users read"
++  on public.assessments for select
++  using (
++    exists (
++      select 1 from public.profiles
++      where id = auth.uid()
++        and is_activated = true
++        and profiles.school_id = assessments.school_id
++    )
++  );
++
++-- Tool directory: activated users read only their own school's tools
++drop policy if exists "tools: activated users read" on public.tool_directory;
++create policy "tools: own school activated users read"
++  on public.tool_directory for select
++  using (
++    exists (
++      select 1 from public.profiles
++      where id = auth.uid()
++        and is_activated = true
++        and profiles.school_id = tool_directory.school_id
++    )
++  );
++
++-- ============================================================
++-- Done. Next steps after running this:
++-- 1. Verify the 'creators' school row has the correct real price/features.
++-- 2. Insert any new school rows via the admin panel (once built) or SQL.
++-- 3. Deploy the updated payment page + browse page (separate files).
++-- ============================================================
+-- 
+2.43.0
+
