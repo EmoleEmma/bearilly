@@ -53,7 +53,7 @@ export default function SalesPage() {
             href="https://pay.stakecut.com/?p=YOUR_PRODUCT_ID"
             className="inline-block bg-[#C89B5A] text-white text-base px-10 py-4 rounded-full font-bold shadow-lg hover:bg-[#4F7C82] hover:shadow-[0_6px_20px_rgba(200,155,90,0.35)] transition-all duration-200"
           >
-            Get Instant Access
+            <img src="https://cdn.stakecut.com/buttons/button1.png" alt="394895" id="stakecut-button" width="100%" height="auto"></img>
           </a>
           <p className="text-xs text-[#8B7355] font-semibold mt-4">
             One payment. Lifetime access to your track.
