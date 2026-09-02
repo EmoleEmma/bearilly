@@ -22,7 +22,7 @@ const adminNav: AdminItem[] = [
   { label: 'Quiz Management', href: '/admin/quizzes', icon: Trophy },
   { label: 'Assessments', href: '/admin/assessments', icon: ClipboardList },
   { label: 'Submissions', href: '/admin/submissions', icon: FolderOpen },
-  { label: 'Stakecut Claims', href: '/admin/claims', icon: Inbox },
+  { label: 'Payment Records', href: '/admin/claims', icon: Inbox },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 

@@ -47,10 +47,9 @@ function BrowseContent() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      // Direct payment is currently off in favor of Stakecut — send
-      // visitors to the sales page instead of straight to register,
-      // since register alone doesn't get them access right now.
-      router.push('/sell')
+      // Send visitors to the track's own landing page first — it carries
+      // the pitch/pricing and links onward to Stakecut and to registration.
+      router.push(`/${slug}`)
       return
     }
 

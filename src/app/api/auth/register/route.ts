@@ -73,16 +73,32 @@ export async function POST(request: Request) {
       )
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase()
+
+    // Check whether this email already has a recorded Stakecut payment.
+    // A claim row is written on /thank-you submission before the buyer
+    // necessarily has an account, so at registration time we look it up
+    // by email and activate immediately if a claim exists. This is the
+    // "trust the /thank-you submission" model — see the payment
+    // architecture notes for the fraud tradeoff this accepts.
+    const { data: existingClaim } = await supabase
+      .from('stakecut_claims')
+      .select('id')
+      .eq('email', normalizedEmail)
+      .maybeSingle()
+
+    const hasPaid = Boolean(existingClaim)
+
     // Insert profile row — this is the footprint the activate/payment route uses
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
         id: authData.user.id,
         full_name: fullName,
-        email: email,
+        email: normalizedEmail,
         role: 'user',
-        is_activated: false,
-        payment_status: 'unpaid',
+        is_activated: hasPaid,
+        payment_status: hasPaid ? 'paid' : 'unpaid',
       }, { onConflict: 'id', ignoreDuplicates: true })
 
     if (profileError) {
@@ -90,8 +106,9 @@ export async function POST(request: Request) {
     }
 
     // No email verification step. Return success with the track (if any)
-    // so the frontend can redirect straight to payment.
-    return NextResponse.json({ success: true, track: track || null })
+    // and whether the account is already activated, so the frontend can
+    // route accordingly.
+    return NextResponse.json({ success: true, track: track || null, activated: hasPaid })
   } catch (err) {
     console.log('Register error:', err)
     return NextResponse.json(

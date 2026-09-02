@@ -122,10 +122,12 @@ export default function AdminClaimsPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-admin-deep flex items-center gap-2">
-          <Inbox size={22} /> Stakecut Claims
+          <Inbox size={22} /> Payment Records
         </h1>
         <p className="text-sm text-admin-slate/60 mt-1">
-          Buyers who paid via Stakecut submit their email here. Cross-check against your{' '}
+          Buyers who paid via Stakecut submit their name and email on the thank-you page, which
+          activates their account automatically once they register. This list is a record for
+          cross-checking against your{' '}
           <a
             href="https://app.stakecut.com/dashboard/orders"
             target="_blank"
@@ -134,14 +136,14 @@ export default function AdminClaimsPage() {
           >
             Stakecut Order &amp; Sales dashboard <ExternalLink size={12} />
           </a>{' '}
-          before approving.
+          and a manual override if someone needs activating by hand.
         </p>
       </div>
 
       <AdminStatStrip stats={[
         { label: 'Pending', value: claims.filter(c => c.status === 'pending').length },
         { label: 'Approved', value: claims.filter(c => c.status === 'approved').length },
-        { label: 'Total Claims', value: claims.length },
+        { label: 'Total Records', value: claims.length },
       ]} />
 
       <div className="flex gap-2 mb-5">

@@ -59,14 +59,18 @@ export default async function TrackLandingPage({ params }: { params: Promise<Par
         <p className="text-xs font-semibold text-[#8B7355] mb-6">One-time payment · Lifetime access</p>
 
         <Link
-          href="/sell"
+          href={`/register?track=${encodeURIComponent(track.slug)}`}
           className="block w-full py-3 rounded-full font-bold text-white text-sm transition-colors"
           style={{ backgroundColor: '#4F7C82' }}
         >
           Get Started
         </Link>
 
-        <p className="text-xs text-[#8B7355] mt-4">
+        <p className="text-xs text-[#8B7355] mt-3">
+          Already paid via Stakecut?{' '}
+          <Link href="/sell" className="font-semibold underline">Go to payment</Link>
+        </p>
+        <p className="text-xs text-[#8B7355] mt-1">
           Already have an account?{' '}
           <Link href="/login" className="font-semibold underline">Sign in</Link>
         </p>

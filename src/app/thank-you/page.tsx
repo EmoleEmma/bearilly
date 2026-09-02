@@ -1,20 +1,17 @@
 'use client'
 
 import { Suspense, useState } from 'react'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle2, Mail } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 
 function ThankYouContent() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const preselectedTrack = searchParams.get('track') || ''
 
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
-  const [note, setNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
@@ -27,46 +24,34 @@ function ThankYouContent() {
     }
 
     setSubmitting(true)
-    const supabase = createClient()
-    const { error: insertError } = await supabase
-      .from('stakecut_claims')
-      .insert({
-        email: email.trim().toLowerCase(),
-        full_name: fullName.trim(),
-        school_slug: preselectedTrack || null,
-        note: note.trim() || null,
+    try {
+      const res = await fetch('/api/thank-you/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim().toLowerCase(),
+          track: preselectedTrack || undefined,
+        }),
       })
+      const data = await res.json()
+      setSubmitting(false)
 
-    setSubmitting(false)
+      if (data.error) {
+        setError(data.error)
+        return
+      }
 
-    if (insertError) {
-      setError('Something went wrong submitting your request. Please try again or contact support.')
-      return
+      // Send them straight onward to create their account. If they
+      // already have one, register will tell them to sign in instead.
+      const dest = preselectedTrack
+        ? `/register?track=${encodeURIComponent(preselectedTrack)}&email=${encodeURIComponent(email.trim())}`
+        : `/register?email=${encodeURIComponent(email.trim())}`
+      router.push(dest)
+    } catch {
+      setSubmitting(false)
+      setError('Something went wrong. Please try again or contact support.')
     }
-
-    setSubmitted(true)
-  }
-
-  if (submitted) {
-    return (
-      <div className="max-w-md mx-auto text-center py-10">
-        <div className="w-16 h-16 rounded-full bg-[#4F7C82]/10 flex items-center justify-center mx-auto mb-5">
-          <CheckCircle2 size={32} className="text-[#4F7C82]" />
-        </div>
-        <h1 className="text-2xl font-black text-[#1E293B] mb-3">Request received</h1>
-        <p className="text-sm font-medium text-[#8B7355] mb-6 leading-relaxed">
-          We're confirming your purchase now. You'll get access within a few hours — usually much sooner.
-          We'll email <span className="font-bold text-[#1E293B]">{email}</span> once your account is activated
-          with instructions to log in.
-        </p>
-        <Link
-          href="/"
-          className="inline-block text-sm font-bold text-[#4F7C82] border-2 border-[#4F7C82] px-6 py-2.5 rounded-full hover:bg-[#4F7C82] hover:text-white transition-all duration-200"
-        >
-          Back to Bearilly
-        </Link>
-      </div>
-    )
   }
 
   return (
@@ -77,7 +62,7 @@ function ThankYouContent() {
         </div>
         <h1 className="text-2xl font-black text-[#1E293B] mb-2">Thank you for your purchase!</h1>
         <p className="text-sm font-medium text-[#8B7355] leading-relaxed">
-          One last step — tell us the email you paid with, and we'll activate your Bearilly account.
+          One last step — tell us your name and the email you paid with, then create your account.
         </p>
       </div>
 
@@ -117,25 +102,12 @@ function ThankYouContent() {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-bold text-[#8B7355] uppercase tracking-wide mb-1.5">
-            Transaction reference <span className="normal-case font-medium text-[#8B7355]/60">(optional, speeds things up)</span>
-          </label>
-          <input
-            type="text"
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            placeholder="From your Stakecut receipt, if you have it"
-            className="w-full px-3 py-2.5 rounded-lg border border-[#E8E0D0] text-sm focus:outline-none focus:ring-2 focus:ring-[#4F7C82]/30"
-          />
-        </div>
-
         <button
           type="submit"
           disabled={submitting}
           className="w-full bg-[#C89B5A] text-white text-sm font-bold py-3 rounded-full shadow-md hover:bg-[#4F7C82] transition-all duration-200 disabled:opacity-60"
         >
-          {submitting ? 'Submitting...' : 'Confirm My Purchase'}
+          {submitting ? 'Submitting...' : 'Continue to Registration'}
         </button>
       </form>
     </div>

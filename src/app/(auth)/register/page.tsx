@@ -155,15 +155,11 @@ function RegisterForm() {
         setError(data.error)
         if (data.redirectTo) setRedirectTo(data.redirectTo)
       } else {
-        // Account is created and already verified — sign in immediately
-        // and go straight to payment (with track carried through if set).
-        const { signInUser } = await import('@/lib/supabase/auth')
-        await signInUser({ email: form.email, password: form.password })
-
-        const dest = preselectedTrack
-          ? `/payment?school=${encodeURIComponent(preselectedTrack)}`
-          : '/payment'
-        router.push(dest)
+        // Account is created. Activation (is_activated) is decided server-side
+        // during registration based on Stakecut payment status — not here.
+        // Send them to login rather than auto-signing-in into a possibly
+        // unactivated account.
+        router.push(`/login?registered=true&email=${encodeURIComponent(form.email)}`)
       }
     } catch {
       setError('Something went wrong. Please try again.')
@@ -181,9 +177,9 @@ function RegisterForm() {
       <div className="mb-6">
         <h2 className="text-3xl font-black text-[#1E293B] tracking-tight mb-1">Join 2,000+ Learners</h2>
         <p className="text-sm font-medium text-[#8B7355]">
-          {preselectedTrack
-            ? 'Register first, then complete payment to unlock full access.'
-            : 'Register first, then choose a track and complete payment to unlock full access.'}
+          If you've already paid via Stakecut and submitted your details on the thank-you page,
+          your account will unlock automatically. If not, you can register now and complete
+          payment separately.
         </p>
       </div>
 
@@ -208,7 +204,7 @@ function RegisterForm() {
 
         <div className="pt-1">
           <Button fullWidth size="lg" loading={loading} onClick={handleRegister} className="!rounded-full shadow-lg py-3.5 font-bold tracking-wide bg-[#C89B5A] hover:bg-[#4F7C82] transition-all duration-200">
-            Create Account & Proceed to Payment
+            Create Account
           </Button>
         </div>
       </div>
