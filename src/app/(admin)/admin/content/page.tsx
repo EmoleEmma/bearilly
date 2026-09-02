@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Plus, X, Pencil, Trash2, ChevronDown, BookOpen, HelpCircle, ClipboardList, Wrench } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -106,6 +106,14 @@ const TABS = [
 type TabKey = typeof TABS[number]['key']
 
 export default function ManageContentPage() {
+  return (
+    <Suspense fallback={null}>
+      <ManageContentPageInner />
+    </Suspense>
+  )
+}
+
+function ManageContentPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
