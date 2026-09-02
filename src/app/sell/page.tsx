@@ -1,8 +1,7 @@
-import Link from 'next/link'
+import Script from 'next/script'
 import {
   Bot, BookOpen, ClipboardList, BarChart2, Sparkles, ShieldCheck, Clock,
 } from 'lucide-react'
-<script src="https://cdn.stakecut.com/pixel/pixel.min.js"></script>
 
 export const metadata = {
   title: 'Bearilly — Learn Anything, Your Way',
@@ -13,13 +12,19 @@ export default function SalesPage() {
   return (
     <div className="bg-[#FAF7F2] text-[#334155] font-sans overflow-x-hidden min-h-screen selection:bg-user-lightgold selection:text-admin-slate">
 
-      {/* NAVBAR */}
+      {/* Stakecut tracking pixel — required for their button to work and
+          for the sale to be attributed to this sales page. Loaded via
+          Next's Script component since a raw <script> tag can't sit
+          inside JSX like plain HTML can. */}
+      <Script src="https://cdn.stakecut.com/pixel/pixel.min.js" strategy="afterInteractive" />
+
+      {/* NAVBAR — no links here per Stakecut's rule: no external/internal
+          links allowed anywhere on the sales page except their button. */}
       <nav className="bg-white/95 backdrop-blur-md border-b border-[#EEF1F4] shadow-sm px-8 py-4 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <span className="text-[#4F7C82] font-black text-2xl tracking-tight">
             🐻 Bearilly
           </span>
-          
         </div>
       </nav>
 
@@ -44,14 +49,17 @@ export default function SalesPage() {
           <p className="text-[#C89B5A] font-black text-2xl mb-8">
             $25 <span className="text-sm font-bold text-[#8B7355] align-middle">/ one-time payment</span>
           </p>
-          
-            <img src="https://cdn.stakecut.com/buttons/button1.png" alt="394895" id="stakecut-button" width="100%" height="auto"></img>
-          
+
+          <img
+            src="https://cdn.stakecut.com/buttons/button1.png"
+            alt="394895"
+            id="stakecut-button"
+            width="100%"
+            height="auto"
+          />
+
           <p className="text-xs text-[#8B7355] font-semibold mt-4">
             One payment. Lifetime access to your track.
-          </p>
-          <p className="text-xs text-[#8B7355] mt-2">
-            Already purchased?{' '}
           </p>
         </div>
       </section>
@@ -96,7 +104,8 @@ export default function SalesPage() {
         </div>
       </section>
 
-      {/* FINAL CTA */}
+      {/* FINAL CTA — same button repeated per Stakecut's own template pattern,
+          no separate link */}
       <section className="px-8 py-20 bg-gradient-to-br from-[#FAF7F2] to-[#F0EAE0] text-center">
         <div className="max-w-xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-black text-[#1E293B] mb-4">
@@ -105,7 +114,12 @@ export default function SalesPage() {
           <p className="text-[#334155]/70 font-medium mb-8">
             Get in, get learning — no waiting, no back-and-forth.
           </p>
-          
+          <img
+            src="https://cdn.stakecut.com/buttons/button1.png"
+            alt="394895"
+            width="240"
+            height="auto"
+          />
         </div>
       </section>
 
