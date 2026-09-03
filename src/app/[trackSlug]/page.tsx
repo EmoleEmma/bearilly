@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 type Params = { trackSlug: string }
-type SearchParams = { paid?: string }
 
 const RESERVED_SLUGS = new Set([
   'login', 'register', 'browse', 'payment', 'dashboard', 'admin',
@@ -11,16 +10,8 @@ const RESERVED_SLUGS = new Set([
   'profile', '_next', 'favicon.ico', 'sell', 'thank-you', 'jv',
 ])
 
-export default async function TrackLandingPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<Params>
-  searchParams: Promise<SearchParams>
-}) {
+export default async function TrackLandingPage({ params }: { params: Promise<Params> }) {
   const { trackSlug } = await params
-  const { paid } = await searchParams
-  const isPaid = paid === 'true'
 
   if (RESERVED_SLUGS.has(trackSlug)) notFound()
 
@@ -60,23 +51,13 @@ export default async function TrackLandingPage({
           </ul>
         )}
 
-        {isPaid ? (
-          <Link
-            href={`/register?track=${encodeURIComponent(track.slug)}`}
-            className="block w-full py-3 rounded-full font-bold text-white text-sm transition-colors mt-2"
-            style={{ backgroundColor: '#4F7C82' }}
-          >
-            Continue to Registration
-          </Link>
-        ) : (
-          <Link
-            href="/sell"
-            className="block w-full py-3 rounded-full font-bold text-white text-sm transition-colors mt-2"
-            style={{ backgroundColor: '#4F7C82' }}
-          >
-            Get Access
-          </Link>
-        )}
+        <Link
+          href={`/register?track=${encodeURIComponent(track.slug)}`}
+          className="block w-full py-3 rounded-full font-bold text-white text-sm transition-colors mt-2"
+          style={{ backgroundColor: '#4F7C82' }}
+        >
+          Get Started
+        </Link>
 
         <p className="text-xs text-[#8B7355] mt-3">
           Already have an account?{' '}
@@ -84,7 +65,7 @@ export default async function TrackLandingPage({
         </p>
         <p className="text-xs text-[#8B7355] mt-1">
           Looking for something else?{' '}
-          <Link href="/browse" className="font-semibold underline">Browse all tracks</Link>
+          <Link href="/sell" className="font-semibold underline">Browse all tracks</Link>
         </p>
       </div>
     </div>

@@ -17,7 +17,7 @@ export default function HomePage() {
           </span>
           <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-[#334155]">
             <Link href="/" className="hover:text-[#4F7C82] transition-colors">Home</Link>
-            <Link href="/browse" className="hover:text-[#4F7C82] transition-colors">Courses</Link>
+            <Link href="/sell" className="hover:text-[#4F7C82] transition-colors">Courses</Link>
             <Link href="#" className="hover:text-[#4F7C82] transition-colors">About</Link>
           </div>
         </div>
@@ -25,7 +25,7 @@ export default function HomePage() {
           <Link href="/login" className="text-[#4F7C82] border border-[#4F7C82] text-sm font-bold px-5 py-2 rounded-full hover:bg-[#4F7C82] hover:text-white transition-all duration-200">
             Sign In
           </Link>
-          <Link href="/browse" className="bg-[#C89B5A] text-white text-sm px-5 py-2 rounded-full font-bold shadow-md hover:bg-[#4F7C82] transition-all duration-200">
+          <Link href="/sell" className="bg-[#C89B5A] text-white text-sm px-5 py-2 rounded-full font-bold shadow-md hover:bg-[#4F7C82] transition-all duration-200">
             Get Started
           </Link>
         </div>
@@ -52,10 +52,10 @@ export default function HomePage() {
               A growing collection of AI-powered learning tracks — pick a subject, learn at your own pace, with an AI tutor by your side.
             </p>
             <div className="flex gap-4 items-center flex-wrap">
-              <Link href="/browse" className="bg-[#C89B5A] text-white text-base px-8 py-4 rounded-full font-bold shadow-lg hover:bg-[#4F7C82] hover:shadow-[0_6px_20px_rgba(200,155,90,0.35)] transition-all duration-200">
+              <Link href="/sell" className="bg-[#C89B5A] text-white text-base px-8 py-4 rounded-full font-bold shadow-lg hover:bg-[#4F7C82] hover:shadow-[0_6px_20px_rgba(200,155,90,0.35)] transition-all duration-200">
                 Get Started
               </Link>
-              <Link href="/browse" className="text-[#4F7C82] border-2 border-[#4F7C82] text-base px-8 py-4 rounded-full font-bold hover:bg-[#4F7C82] hover:text-white transition-all duration-200">
+              <Link href="/sell" className="text-[#4F7C82] border-2 border-[#4F7C82] text-base px-8 py-4 rounded-full font-bold hover:bg-[#4F7C82] hover:text-white transition-all duration-200">
                 Explore Courses
               </Link>
             </div>
@@ -225,7 +225,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(#4F7C82_1px,transparent_1px)] [background-size:18px_18px] opacity-[0.07]"></div>
         <h2 className="text-3xl md:text-4xl font-black text-white mb-3 relative">Ready to Start Your Journey?</h2>
         <p className="text-[#94A3B8] text-base max-w-md mx-auto mb-8 relative">Join a growing community of learners, across every track.</p>
-        <Link href="/browse" className="bg-[#C89B5A] text-white text-base px-8 py-3.5 rounded-full font-bold shadow-lg hover:bg-[#B3874B] hover:scale-105 transition-all duration-200 inline-block relative">
+        <Link href="/sell" className="bg-[#C89B5A] text-white text-base px-8 py-3.5 rounded-full font-bold shadow-lg hover:bg-[#B3874B] hover:scale-105 transition-all duration-200 inline-block relative">
           Join Bearilly — Sign Up Now
         </Link>
       </section>
@@ -250,7 +250,7 @@ export default function HomePage() {
             <p className="text-[#F1F5F9] font-bold text-sm mb-4 uppercase tracking-wider">Account</p>
             <ul className="space-y-2 text-sm">
               <li><Link href="/login" className="hover:text-[#C89B5A] transition-colors">Sign In</Link></li>
-              <li><Link href="/browse" className="hover:text-[#C89B5A] transition-colors">Register</Link></li>
+              <li><Link href="/sell" className="hover:text-[#C89B5A] transition-colors">Register</Link></li>
               <li><Link href="/payment" className="hover:text-[#C89B5A] transition-colors">Payment</Link></li>
             </ul>
           </div>
