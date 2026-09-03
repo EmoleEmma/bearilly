@@ -42,11 +42,13 @@ function ThankYouContent() {
         return
       }
 
-      // Send them straight onward to create their account. If they
-      // already have one, register will tell them to sign in instead.
+      // Send them to the track's own landing page next, which carries the
+      // pitch and its own "Get Started" link into /register with the
+      // track preserved. If no track was known, fall back to browse so
+      // they can pick one instead of landing on a bare register form.
       const dest = preselectedTrack
-        ? `/register?track=${encodeURIComponent(preselectedTrack)}&email=${encodeURIComponent(email.trim())}`
-        : `/register?email=${encodeURIComponent(email.trim())}`
+        ? `/${preselectedTrack}?email=${encodeURIComponent(email.trim())}`
+        : `/browse?email=${encodeURIComponent(email.trim())}`
       router.push(dest)
     } catch {
       setSubmitting(false)
