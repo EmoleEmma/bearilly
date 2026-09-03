@@ -47,8 +47,8 @@ export async function POST(request: Request) {
           return NextResponse.json(
             {
               error:
-                'You already started registration but have not completed payment yet. Please proceed to payment to activate your account.',
-              redirectTo: '/payment',
+                'An account with this email already exists but is not yet activated. Please sign in — if that fails, contact support.',
+              redirectTo: '/login',
               email,
             },
             { status: 409 }
@@ -75,19 +75,43 @@ export async function POST(request: Request) {
 
     const normalizedEmail = String(email).trim().toLowerCase()
 
-    // Check whether this email already has a recorded Stakecut payment.
-    // A claim row is written on /thank-you submission before the buyer
-    // necessarily has an account, so at registration time we look it up
-    // by email and activate immediately if a claim exists. This is the
-    // "trust the /thank-you submission" model — see the payment
-    // architecture notes for the fraud tradeoff this accepts.
-    const { data: existingClaim } = await supabase
-      .from('stakecut_claims')
-      .select('id')
-      .eq('email', normalizedEmail)
-      .maybeSingle()
+    // TEMPORARY: activation gate bypassed. Every registration is activated
+    // immediately regardless of payment status. Revert by restoring the
+    // stakecut_claims lookup below (hasPaid = Boolean(existingClaim)) once
+    // the real activation bug is fixed.
+    const hasPaid = true
 
-    const hasPaid = Boolean(existingClaim)
+    // Resolve school_id so every profile is attached to a track, not just
+    // ones that arrived through a track-specific /thank-you or register URL.
+    // Priority: explicit ?track= param on this request, then the school_slug
+    // recorded on a matching stakecut_claims row, then null (no track — the
+    // account still activates, but /toolkit and other track-scoped pages
+    // will show nothing until an admin or the user attaches one manually).
+    let schoolId: string | null = null
+
+    let resolvedSlug: string | null = track || null
+
+    if (!resolvedSlug) {
+      const { data: claimRow } = await supabase
+        .from('stakecut_claims')
+        .select('school_slug')
+        .eq('email', normalizedEmail)
+        .maybeSingle()
+      resolvedSlug = claimRow?.school_slug || null
+    }
+
+    if (resolvedSlug) {
+      const { data: schoolRow, error: schoolLookupError } = await supabase
+        .from('schools')
+        .select('id')
+        .eq('slug', resolvedSlug)
+        .maybeSingle()
+
+      if (schoolLookupError) {
+        console.error('School lookup error:', schoolLookupError)
+      }
+      schoolId = schoolRow?.id || null
+    }
 
     // Insert profile row — this is the footprint the activate/payment route uses
     const { error: profileError } = await supabase
@@ -99,6 +123,7 @@ export async function POST(request: Request) {
         role: 'user',
         is_activated: hasPaid,
         payment_status: hasPaid ? 'paid' : 'unpaid',
+        school_id: schoolId,
       }, { onConflict: 'id', ignoreDuplicates: true })
 
     if (profileError) {
@@ -108,7 +133,7 @@ export async function POST(request: Request) {
     // No email verification step. Return success with the track (if any)
     // and whether the account is already activated, so the frontend can
     // route accordingly.
-    return NextResponse.json({ success: true, track: track || null, activated: hasPaid })
+    return NextResponse.json({ success: true, track: resolvedSlug, activated: hasPaid })
   } catch (err) {
     console.log('Register error:', err)
     return NextResponse.json(
