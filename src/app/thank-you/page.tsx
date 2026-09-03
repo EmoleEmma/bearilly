@@ -44,10 +44,13 @@ function ThankYouContent() {
 
       // Send them to the track's own landing page next, which carries the
       // pitch and its own "Get Started" link into /register with the
-      // track preserved. If no track was known, fall back to browse so
-      // they can pick one instead of landing on a bare register form.
+      // track preserved. paid=true tells that page this visitor already
+      // paid (via Stakecut), so it shows "Continue to Registration"
+      // instead of the Stakecut "Get Access" CTA. If no track was known,
+      // fall back to browse so they can pick one instead of landing on a
+      // bare register form.
       const dest = preselectedTrack
-        ? `/${preselectedTrack}?email=${encodeURIComponent(email.trim())}`
+        ? `/${preselectedTrack}?email=${encodeURIComponent(email.trim())}&paid=true`
         : `/browse?email=${encodeURIComponent(email.trim())}`
       router.push(dest)
     } catch {

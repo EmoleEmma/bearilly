@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 type Params = { trackSlug: string }
+type SearchParams = { paid?: string }
 
 const RESERVED_SLUGS = new Set([
   'login', 'register', 'browse', 'payment', 'dashboard', 'admin',
@@ -10,19 +11,23 @@ const RESERVED_SLUGS = new Set([
   'profile', '_next', 'favicon.ico', 'sell', 'thank-you', 'jv',
 ])
 
-function formatNaira(kobo: number) {
-  return `₦${(kobo / 100).toLocaleString('en-NG')}`
-}
-
-export default async function TrackLandingPage({ params }: { params: Promise<Params> }) {
+export default async function TrackLandingPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>
+  searchParams: Promise<SearchParams>
+}) {
   const { trackSlug } = await params
+  const { paid } = await searchParams
+  const isPaid = paid === 'true'
 
   if (RESERVED_SLUGS.has(trackSlug)) notFound()
 
   const supabase = await createClient()
   const { data: track } = await supabase
     .from('schools')
-    .select('id, slug, name, tagline, description, price_kobo, features')
+    .select('id, slug, name, tagline, description, features')
     .eq('slug', trackSlug)
     .eq('is_active', true)
     .single()
@@ -55,22 +60,25 @@ export default async function TrackLandingPage({ params }: { params: Promise<Par
           </ul>
         )}
 
-        <p className="text-2xl font-black text-admin-teal mb-1">{formatNaira(track.price_kobo)}</p>
-        <p className="text-xs font-semibold text-[#8B7355] mb-6">One-time payment · Lifetime access</p>
-
-        <Link
-          href={`/register?track=${encodeURIComponent(track.slug)}`}
-          className="block w-full py-3 rounded-full font-bold text-white text-sm transition-colors"
-          style={{ backgroundColor: '#4F7C82' }}
-        >
-          Get Started
-        </Link>
+        {isPaid ? (
+          <Link
+            href={`/register?track=${encodeURIComponent(track.slug)}`}
+            className="block w-full py-3 rounded-full font-bold text-white text-sm transition-colors mt-2"
+            style={{ backgroundColor: '#4F7C82' }}
+          >
+            Continue to Registration
+          </Link>
+        ) : (
+          <Link
+            href="/sell"
+            className="block w-full py-3 rounded-full font-bold text-white text-sm transition-colors mt-2"
+            style={{ backgroundColor: '#4F7C82' }}
+          >
+            Get Access
+          </Link>
+        )}
 
         <p className="text-xs text-[#8B7355] mt-3">
-          Already paid via Stakecut?{' '}
-          <Link href="/sell" className="font-semibold underline">Go to payment</Link>
-        </p>
-        <p className="text-xs text-[#8B7355] mt-1">
           Already have an account?{' '}
           <Link href="/login" className="font-semibold underline">Sign in</Link>
         </p>
