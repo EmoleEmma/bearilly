@@ -124,7 +124,7 @@ export async function POST(request: Request) {
         is_activated: hasPaid,
         payment_status: hasPaid ? 'paid' : 'unpaid',
         school_id: schoolId,
-      }, { onConflict: 'id', ignoreDuplicates: true })
+      }, { onConflict: 'id', ignoreDuplicates: false })
 
     if (profileError) {
       console.log('Profile insert error:', profileError)
