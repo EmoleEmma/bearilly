@@ -113,7 +113,13 @@ export async function POST(request: Request) {
       schoolId = schoolRow?.id || null
     }
 
-    // Insert profile row — this is the footprint the activate/payment route uses
+    // NOTE: a database trigger (on_auth_user_created) already inserts a
+    // default profiles row (is_activated: false, payment_status: 'unpaid')
+    // the instant createUser() runs above, BEFORE this code executes.
+    // ignoreDuplicates must be false here so this upsert actually
+    // overwrites that row with the real values — ignoreDuplicates: true
+    // was silently discarding every value below on conflict, which is why
+    // is_activated stayed false even when this route said activated: true.
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
