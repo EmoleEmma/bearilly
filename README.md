@@ -1,36 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bearilly
 
-## Getting Started
+A learning-focused Progressive Web App designed to support
+students through learning, assessment, submission, and
+AI-assisted educational features.
 
-First, run the development server:
+## 🚀 Live Application
 
-```bash
+[View Bearilly](https://bearilly.vercel.app) 
+
+## 📸 Screenshots
+
+![Dashboard](screenshots/dashboard.png)
+
+![Learning](screenshots/learning.png)
+
+![Assessment](screenshots/assessment.png)
+
+## 🎯 Project Overview
+
+Bearilly was built to explore how modern web applications
+can combine learning workflows, assessments, submissions,
+and AI-assisted functionality in a single platform.
+
+The project focuses on building a practical, scalable
+application using modern TypeScript and React technologies.
+
+## ✨ Features
+
+- Student learning interface
+- Learning content management
+- Assessment functionality
+- Submission workflows
+- AI-assisted learning features
+- Responsive user interface
+- Progressive Web App capabilities
+- Form validation
+- Authentication and user management
+
+## 🏗️ Architecture
+
+```text
+User
+  │
+  ▼
+Next.js Application
+  │
+  ├── UI Components
+  │
+  ├── Application Routes
+  │
+  ├── Middleware
+  │
+  └── Server-side Logic
+          │
+          ▼
+       Supabase
+          │
+          ├── Authentication
+          └── Database
+          
+          │
+          ▼
+       OpenAI API
+🛠️ Technology Stack
+
+Technology
+Purpose
+TypeScript
+Application development
+Next.js
+Web application framework
+React
+User interface
+Tailwind CSS
+Styling
+Supabase
+Database and authentication
+OpenAI API
+AI-assisted functionality
+Validation
+React Hook Form
+Form management
+PWA
+Progressive web application
+
+📁 Project Structure
+src/
+├── app/
+├── components/
+├── hooks/
+├── lib/
+│   └── supabase/
+└── middleware.ts
+
+🔐 Security Considerations
+Authentication handled through Supabase
+Input validation using Supabase
+Protected application routes
+Environment variables used for sensitive configuration
+Server-side handling of sensitive operations
+
+🧪 Testing
+Describe the tests currently implemented here.
+
+⚙️ Local Development
+Requirements
+Node.js
+npm
+Supabase project
+Required environment variables
+
+Installation
+git clone https://github.com/EmoleEmma/bearilly.git
+
+cd bearilly
+
+npm install
+
+Environment Variables
+Create a .env.local file:
+NEXT_PUBLIC_SUPABASE_URL=your_value
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_value
+OPENAI_API_KEY=your_value
+
+Never commit real credentials.
+Run the application
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Open:
+http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+📚 What I Learned
+Building applications with Next.js and TypeScript
+Structuring a larger React application
+Working with Supabase
+Authentication and middleware
+Form validation
+Integrating AI functionality
+Building Progressive Web Applications
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🚧 Future Improvements
+Automated testing
+CI/CD pipeline
+Improved monitoring
+Additional security controls
+Performance optimization
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+👨‍💻 Author
+Emmanuel
+Computer Science Student | Software Engineering | Application Security
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+.[GitHub](https://github.com/EmoleEmma)
+.[LinkIn](https://www.linkedin.com/in/chibuikem-emole-b115113a2) 
