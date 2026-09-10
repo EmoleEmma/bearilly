@@ -62,7 +62,8 @@ Next.js Application
           │
           ▼
        OpenAI API
-🛠️ Technology Stack
+
+##🛠️ Technology Stack
 
 Technology
 Purpose
@@ -84,7 +85,7 @@ Form management
 PWA
 Progressive web application
 
-📁 Project Structure
+##📁 Project Structure
 src/
 ├── app/
 ├── components/
@@ -93,31 +94,31 @@ src/
 │   └── supabase/
 └── middleware.ts
 
-🔐 Security Considerations
+##🔐 Security Considerations
 Authentication handled through Supabase
 Input validation using Supabase
 Protected application routes
 Environment variables used for sensitive configuration
 Server-side handling of sensitive operations
 
-🧪 Testing
+##🧪 Testing
 Describe the tests currently implemented here.
 
-⚙️ Local Development
+##⚙️ Local Development
 Requirements
 Node.js
 npm
 Supabase project
 Required environment variables
 
-Installation
+##Installation
 git clone https://github.com/EmoleEmma/bearilly.git
 
 cd bearilly
 
 npm install
 
-Environment Variables
+##Environment Variables
 Create a .env.local file:
 NEXT_PUBLIC_SUPABASE_URL=your_value
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_value
@@ -129,7 +130,7 @@ npm run dev
 Open:
 http://localhost:3000
 
-📚 What I Learned
+##📚 What I Learned
 Building applications with Next.js and TypeScript
 Structuring a larger React application
 Working with Supabase
@@ -138,16 +139,16 @@ Form validation
 Integrating AI functionality
 Building Progressive Web Applications
 
-🚧 Future Improvements
+##🚧 Future Improvements
 Automated testing
 CI/CD pipeline
 Improved monitoring
 Additional security controls
 Performance optimization
 
-👨‍💻 Author
+##👨‍💻 Author
 Emmanuel
 Computer Science Student | Software Engineering | Application Security
 
-.[GitHub](https://github.com/EmoleEmma)
-.[LinkIn](https://www.linkedin.com/in/chibuikem-emole-b115113a2) 
+![GitHub](https://github.com/EmoleEmma)
+![LinkIn](https://www.linkedin.com/in/chibuikem-emole-b115113a2) 
