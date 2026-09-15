@@ -42,14 +42,7 @@ function ThankYouContent() {
         return
       }
 
-      // Send them to the track's own landing page next, which carries the
-      // pitch and its own "Get Started" link straight into /register with
-      // the track preserved. If no track was known (shouldn't normally
-      // happen from a Stakecut redirect), fall back to /register directly
-      // so they're not stuck.
-      const dest = preselectedTrack
-        ? `/${preselectedTrack}?email=${encodeURIComponent(email.trim())}`
-        : `/register?email=${encodeURIComponent(email.trim())}`
+      const dest = `/browse?email=${encodeURIComponent(email.trim())}`
       router.push(dest)
     } catch {
       setSubmitting(false)
