@@ -26,7 +26,7 @@ export default function HomePage() {
             Sign In
           </Link>
           <Link href="/browse" className="bg-[#C89B5A] text-white text-sm px-5 py-2 rounded-full font-bold shadow-md hover:bg-[#4F7C82] transition-all duration-200">
-            Get Started
+            Sign Up
           </Link>
         </div>
         </div>
@@ -52,7 +52,7 @@ export default function HomePage() {
               A growing collection of AI-powered learning tracks — pick a subject, learn at your own pace, with an AI tutor by your side.
             </p>
             <div className="flex gap-4 items-center flex-wrap">
-              <Link href="/browse" className="bg-[#C89B5A] text-white text-base px-8 py-4 rounded-full font-bold shadow-lg hover:bg-[#4F7C82] hover:shadow-[0_6px_20px_rgba(200,155,90,0.35)] transition-all duration-200">
+              <Link href="/login" className="bg-[#C89B5A] text-white text-base px-8 py-4 rounded-full font-bold shadow-lg hover:bg-[#4F7C82] hover:shadow-[0_6px_20px_rgba(200,155,90,0.35)] transition-all duration-200">
                 Get Started
               </Link>
               <Link href="/browse" className="text-[#4F7C82] border-2 border-[#4F7C82] text-base px-8 py-4 rounded-full font-bold hover:bg-[#4F7C82] hover:text-white transition-all duration-200">

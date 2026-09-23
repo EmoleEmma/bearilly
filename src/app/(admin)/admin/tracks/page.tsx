@@ -167,10 +167,10 @@ export default function AdminTracksPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-admin-deep flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Layers size={22} /> Tracks
           </h1>
-          <p className="text-sm text-admin-slate/60 mt-1">
+          <p className="text-sm text-admin-muted mt-1">
             Add a new track — it goes live at bearilly.com/&lt;slug&gt; immediately, no code required.
           </p>
         </div>
@@ -190,47 +190,47 @@ export default function AdminTracksPage() {
 
       {loading && (
         <div className="space-y-3">
-          {[1, 2].map(i => <div key={i} className="h-20 bg-white rounded-xl animate-pulse" />)}
+          {[1, 2].map(i => <div key={i} className="h-20 bg-admin-surface rounded-xl animate-pulse" />)}
         </div>
       )}
 
       {!loading && tracks.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-xl text-sm font-semibold text-admin-slate/50">
+        <div className="text-center py-16 bg-admin-surface rounded-xl text-sm font-semibold text-admin-muted">
           No tracks yet. Click "New Track" to add the first one.
         </div>
       )}
 
       <div className="space-y-3">
         {tracks.map(track => (
-          <div key={track.id} className="bg-white rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 shadow-sm">
+          <div key={track.id} className="bg-admin-surface border border-admin-border/40 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 shadow-sm">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-bold text-admin-deep truncate">{track.name}</p>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${track.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                <p className="font-bold text-white truncate">{track.name}</p>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${track.is_active ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-500/20 text-slate-400'}`}>
                   {track.is_active ? 'ACTIVE' : 'INACTIVE'}
                 </span>
               </div>
-              <p className="text-xs text-admin-slate/50 font-mono mt-0.5 truncate">bearilly.com/{track.slug}</p>
-              {track.tagline && <p className="text-sm text-admin-slate/70 mt-1">{track.tagline}</p>}
+              <p className="text-xs text-admin-muted font-mono mt-0.5 truncate">bearilly.com/{track.slug}</p>
+              {track.tagline && <p className="text-sm text-admin-muted mt-1">{track.tagline}</p>}
             </div>
             <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2 sm:gap-1 shrink-0">
-              <p className="font-bold text-admin-teal">{formatNaira(track.price_kobo)}</p>
+              <p className="font-bold text-teal-300">{formatNaira(track.price_kobo)}</p>
               <div className="flex items-center gap-2">
                 <Link
-                  href={`/admin/content?track=${track.id}`}
-                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
+                  href={`/admin/tracks/${track.id}`}
+                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-admin-border text-admin-muted hover:text-white hover:bg-admin-card transition-colors whitespace-nowrap"
                 >
-                  <FilePlus2 size={13} /> Content
+                  <FilePlus2 size={13} /> Open
                 </Link>
                 <button
                   onClick={() => toggleActive(track)}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-admin-border text-admin-muted hover:text-white hover:bg-admin-card transition-colors whitespace-nowrap"
                 >
                   {track.is_active ? 'Deactivate' : 'Activate'}
                 </button>
                 <button
                   onClick={() => openEditForm(track)}
-                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors shrink-0"
+                  className="p-2 rounded-lg border border-admin-border text-admin-muted hover:text-white hover:bg-admin-card transition-colors shrink-0"
                   aria-label="Edit track"
                 >
                   <Pencil size={14} />
@@ -244,27 +244,27 @@ export default function AdminTracksPage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={closeForm}>
           <div
-            className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"
+            className="bg-admin-surface border border-admin-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-admin-deep">
+              <h2 className="text-lg font-bold text-white">
                 {form.id ? 'Edit Track' : 'New Track'}
               </h2>
-              <button onClick={closeForm} className="p-1 rounded-lg hover:bg-gray-100">
+              <button onClick={closeForm} className="p-1 rounded-lg hover:bg-admin-card">
                 <X size={18} />
               </button>
             </div>
 
             {error && (
-              <div className="mb-4 px-3 py-2 rounded-lg bg-red-50 text-red-600 text-sm font-medium">
+              <div className="mb-4 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 text-sm font-medium">
                 {error}
               </div>
             )}
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-admin-slate/60 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-bold text-admin-muted uppercase tracking-wide mb-1.5">
                   Track Name
                 </label>
                 <input
@@ -275,28 +275,28 @@ export default function AdminTracksPage() {
                     setForm(f => ({ ...f, name, slug: f.id ? f.slug : slugify(name) }))
                   }}
                   placeholder="e.g. Chemistry"
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-admin-teal/30"
+                  className="w-full px-3 py-2.5 rounded-lg border border-admin-border bg-admin-card text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-admin-accent/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-admin-slate/60 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-bold text-admin-muted uppercase tracking-wide mb-1.5">
                   URL Slug
                 </label>
                 <div className="flex items-center gap-1 text-sm">
-                  <span className="text-admin-slate/40 font-mono shrink-0">bearilly.com/</span>
+                  <span className="text-slate-500 font-mono shrink-0">bearilly.com/</span>
                   <input
                     type="text"
                     value={form.slug}
                     onChange={e => setForm(f => ({ ...f, slug: slugify(e.target.value) }))}
                     placeholder="chemistry"
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-admin-teal/30"
+                    className="w-full px-3 py-2.5 rounded-lg border border-admin-border bg-admin-card text-white placeholder:text-slate-500 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-admin-accent/50"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-admin-slate/60 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-bold text-admin-muted uppercase tracking-wide mb-1.5">
                   Tagline
                 </label>
                 <input
@@ -304,12 +304,12 @@ export default function AdminTracksPage() {
                   value={form.tagline}
                   onChange={e => setForm(f => ({ ...f, tagline: e.target.value }))}
                   placeholder="Short one-liner shown on the browse page"
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-admin-teal/30"
+                  className="w-full px-3 py-2.5 rounded-lg border border-admin-border bg-admin-card text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-admin-accent/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-admin-slate/60 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-bold text-admin-muted uppercase tracking-wide mb-1.5">
                   Description
                 </label>
                 <textarea
@@ -317,12 +317,12 @@ export default function AdminTracksPage() {
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   placeholder="Longer copy shown on the payment page"
                   rows={2}
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-admin-teal/30 resize-none"
+                  className="w-full px-3 py-2.5 rounded-lg border border-admin-border bg-admin-card text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-admin-accent/50 resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-admin-slate/60 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-bold text-admin-muted uppercase tracking-wide mb-1.5">
                   Price (₦)
                 </label>
                 <input
@@ -330,12 +330,12 @@ export default function AdminTracksPage() {
                   value={form.price}
                   onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
                   placeholder="1000"
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-admin-teal/30"
+                  className="w-full px-3 py-2.5 rounded-lg border border-admin-border bg-admin-card text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-admin-accent/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-admin-slate/60 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-bold text-admin-muted uppercase tracking-wide mb-1.5">
                   Features (one per line)
                 </label>
                 <textarea
@@ -343,11 +343,11 @@ export default function AdminTracksPage() {
                   onChange={e => setForm(f => ({ ...f, features: e.target.value }))}
                   placeholder={'Full access to all lessons\nUnlimited AI Tutor conversations\nGraded assessments'}
                   rows={4}
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-admin-teal/30 resize-none"
+                  className="w-full px-3 py-2.5 rounded-lg border border-admin-border bg-admin-card text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-admin-accent/50 resize-none"
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-sm font-semibold text-admin-deep">
+              <label className="flex items-center gap-2 text-sm font-semibold text-white">
                 <input
                   type="checkbox"
                   checked={form.is_active}
@@ -361,7 +361,7 @@ export default function AdminTracksPage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={closeForm}
-                className="flex-1 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-admin-slate/70 hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2.5 rounded-lg border border-admin-border text-sm font-semibold text-admin-muted hover:bg-admin-card transition-colors"
               >
                 Cancel
               </button>
