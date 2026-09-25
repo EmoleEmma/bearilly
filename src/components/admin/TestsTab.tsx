@@ -26,9 +26,10 @@ export default function TestsTab({ trackId }: { trackId: string }) {
   const [topics, setTopics] = useState<Topic[]>([])
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null)
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
-  const [view, setView] = useState<'topics' | 'mock'>('topics')
+  const [view, setView] = useState<'topics' | 'mock' | 'subject'>('topics')
   const [sets, setSets] = useState<SetRow[]>([])
   const [mockSet, setMockSet] = useState<SetRow | null>(null)
+  const [subjectSet, setSubjectSet] = useState<SetRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState<string | null>(null)
@@ -67,9 +68,25 @@ export default function TestsTab({ trackId }: { trackId: string }) {
     setLoading(false)
   }, [])
 
+  // The subject-wide test ("finish all topics, take a quiz"): a single
+  // question_sets row scoped to the subject (subject_id set, lesson_id null).
+  const loadSubjectSet = useCallback(async (subjectId: string) => {
+    setLoading(true)
+    setError('')
+    const supabase = createClient()
+    const { data, error: e } = await supabase
+      .from('question_sets')
+      .select('id, lesson_id, type, title, question_count, time_limit_sec, pass_mark')
+      .eq('subject_id', subjectId).is('lesson_id', null).maybeSingle()
+    if (e) setError(`Could not load test settings: ${e.message}`)
+    setSubjectSet((data ?? null) as SetRow | null)
+    setLoading(false)
+  }, [])
+
   useEffect(() => {
-    if (selectedTopicId) loadTopicSets(selectedTopicId)
-  }, [selectedTopicId, loadTopicSets])
+    if (view === 'subject' && selectedSubjectId) loadSubjectSet(selectedSubjectId)
+    else if (view === 'topics' && selectedTopicId) loadTopicSets(selectedTopicId)
+  }, [selectedTopicId, selectedSubjectId, view, loadTopicSets, loadSubjectSet])
 
   const selectedSubject = subjects.find(s => s.id === selectedSubjectId) ?? null
   const selectedTopic = topics.find(t => t.id === selectedTopicId) ?? null
@@ -88,6 +105,7 @@ export default function TestsTab({ trackId }: { trackId: string }) {
     setSaved(set?.id ?? null)
     setTimeout(() => setSaved(null), 1500)
     if (view === 'mock') load()
+    else if (view === 'subject' && selectedSubjectId) loadSubjectSet(selectedSubjectId)
     else if (selectedTopicId) loadTopicSets(selectedTopicId)
   }
 
@@ -124,7 +142,7 @@ export default function TestsTab({ trackId }: { trackId: string }) {
           {TOPIC_KINDS.map(kind => {
             const set = sets.find(s => s.type === kind) ?? null
             return (
-              <AdminCard key={kind} className="p-5!">
+              <AdminCard key={kind} className="!p-5">
                 <p className="text-white font-bold mb-3">{KIND_LABEL[kind]}</p>
                 {set ? (
                   <SettingRow set={set} saving={saving === set.id} saved={saved === set.id} onSave={p => saveSet(set, p)} />
@@ -139,15 +157,38 @@ export default function TestsTab({ trackId }: { trackId: string }) {
     )
   }
 
+  // ── Subject-wide test settings ("finish all topics, take a quiz") ──
+  if (view === 'subject' && selectedSubject) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
+          <button onClick={() => setView('topics')} className="text-admin-muted hover:text-white">{selectedSubject.name}</button>
+          <ChevronRight size={14} className="text-slate-500" />
+          <span className="text-white font-semibold">Subject Test</span>
+        </div>
+        {error && <ErrorBanner message={error} />}
+        {subjectSet ? (
+          <SettingRow set={subjectSet} saving={saving === subjectSet.id} saved={saved === subjectSet.id}
+            onSave={p => saveSet(subjectSet, p)} />
+        ) : (
+          <EmptyState title="No Subject Test yet" note="Add questions for this subject's test in the Questions tab first — settings appear here once it exists." />
+        )}
+      </div>
+    )
+  }
+
   // ── One subject's topics ────────────────────────────────
   if (selectedSubject) {
     const list = topicsFor(selectedSubject.id)
     return (
       <div>
-        <div className="flex items-center gap-2 text-sm mb-4">
-          <button onClick={() => setSelectedSubjectId(null)} className="text-admin-muted hover:text-white">Subjects</button>
-          <ChevronRight size={14} className="text-slate-500" />
-          <span className="text-white font-semibold">{selectedSubject.name}</span>
+        <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+          <div className="flex items-center gap-2 text-sm">
+            <button onClick={() => setSelectedSubjectId(null)} className="text-admin-muted hover:text-white">Subjects</button>
+            <ChevronRight size={14} className="text-slate-500" />
+            <span className="text-white font-semibold">{selectedSubject.name}</span>
+          </div>
+          <AdminButton variant="ghost" onClick={() => setView('subject')}>Subject Test</AdminButton>
         </div>
         {list.length === 0 ? (
           <EmptyState title="No topics in this subject yet" note="Add topics in the Subjects & Topics tab first." />
@@ -179,8 +220,8 @@ export default function TestsTab({ trackId }: { trackId: string }) {
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
           {subjects.map(s => (
-            <button key={s.id} onClick={() => setSelectedSubjectId(s.id)} className="text-left">
-              <AdminCard className="p-4! hover:border-admin-accent/50">
+            <button key={s.id} onClick={() => { setView('topics'); setSelectedSubjectId(s.id) }} className="text-left">
+              <AdminCard className="!p-4 hover:border-admin-accent/50">
                 <p className="text-white font-bold">{s.name}</p>
                 <p className="text-xs text-admin-muted mt-0.5">{topicsFor(s.id).length} topics</p>
               </AdminCard>

@@ -2,27 +2,26 @@
 
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { KIND_LABEL, type Kind } from '@/lib/import/types'
+import { useSubject } from '@/lib/subjects'
 import TestRunner from '@/components/student/TestRunner'
 
-export default function TakeTestPage() {
+export default function SubjectQuizPage() {
   const params = useParams()
   const slug = params.slug as string
-  const lessonId = params.lessonId as string
-  const kind = params.kind as Kind
-  const label = KIND_LABEL[kind] ?? 'Test'
+  const setId = params.setId as string
+  const { subject } = useSubject(slug)
 
   return (
     <TestRunner
-      title={label}
-      backHref={`/learn/${slug}/${lessonId}`}
-      backLabel="Back to the topic"
+      title={subject ? `${subject.name} Quiz` : 'Subject Quiz'}
+      backHref={`/learn/${slug}`}
+      backLabel={subject ? `Back to ${subject.name}` : 'Back to lessons'}
       onLoadSet={async () => {
         const supabase = createClient()
         const { data } = await supabase
           .from('question_sets')
           .select('id, question_count, time_limit_sec, pass_mark, is_active')
-          .eq('lesson_id', lessonId).eq('type', kind)
+          .eq('id', setId)
           .maybeSingle()
         return data
       }}

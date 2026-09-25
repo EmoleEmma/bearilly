@@ -24,7 +24,7 @@ const adminNav: AdminItem[] = [
   { label: 'Tracks',      href: '/admin/tracks',      icon: Layers, alsoActiveFor: ['/admin/content'] },
   { label: 'Users',       href: '/admin/users',       icon: Users,  alsoActiveFor: ['/admin/claims'] },
   { label: 'Results',     href: '/admin/quizzes',     icon: Trophy },
-  { label: 'Assignments', href: '/admin/assessments', icon: ClipboardList, alsoActiveFor: ['/admin/submissions', '/admin/assignments'] },
+  { label: 'Assignments', href: '/admin/assignments', icon: ClipboardList, alsoActiveFor: ['/admin/assessments', '/admin/submissions'] },
 ]
 
 function isActive(pathname: string, item: AdminItem) {

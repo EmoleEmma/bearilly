@@ -44,7 +44,7 @@ export default function QuestionsTab({ trackId }: { trackId: string }) {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
   const [questions, setQuestions] = useState<QuestionRow[]>([])
   const [mockQuestions, setMockQuestions] = useState<QuestionRow[]>([])
-  const [view, setView] = useState<'topics' | 'mock'>('topics')
+  const [view, setView] = useState<'topics' | 'mock' | 'subject'>('topics')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -90,9 +90,26 @@ export default function QuestionsTab({ trackId }: { trackId: string }) {
     setLoading(false)
   }, [])
 
+  // Subject-wide questions: lesson_id IS NULL, subject_id = this subject. Kept
+  // separate from loadTopicQuestions() so switching between a topic and the
+  // subject-wide test can never accidentally mix the two lists.
+  const loadSubjectQuestions = useCallback(async (subjectId: string) => {
+    setLoading(true)
+    setError('')
+    const supabase = createClient()
+    const { data, error: e } = await supabase
+      .from('quizzes')
+      .select('id, lesson_id, kind, difficulty, question, options, answer, explanation')
+      .eq('subject_id', subjectId).is('lesson_id', null).not('kind', 'is', null)
+    if (e) setError(`Could not load questions: ${e.message}`)
+    setQuestions((data || []) as QuestionRow[])
+    setLoading(false)
+  }, [])
+
   useEffect(() => {
-    if (selectedTopicId) loadTopicQuestions(selectedTopicId)
-  }, [selectedTopicId, loadTopicQuestions])
+    if (view === 'subject' && selectedSubjectId) loadSubjectQuestions(selectedSubjectId)
+    else if (view === 'topics' && selectedTopicId) loadTopicQuestions(selectedTopicId)
+  }, [selectedTopicId, selectedSubjectId, view, loadTopicQuestions, loadSubjectQuestions])
 
   const byKind = useMemo(() => {
     const m = new Map<Kind, QuestionRow[]>()
@@ -139,6 +156,13 @@ export default function QuestionsTab({ trackId }: { trackId: string }) {
     } else if (view === 'mock') {
       const { error: e } = await supabase.from('quizzes').insert({ ...payload, school_id: trackId, lesson_id: null })
       if (e) { setError('Failed to save question.'); setSaving(false); return }
+    } else if (view === 'subject' && selectedSubject) {
+      // A subject-wide test question (e.g. the "finish all topics" quiz):
+      // scoped to the subject, with no single topic.
+      const { error: e } = await supabase.from('quizzes').insert({
+        ...payload, school_id: trackId, lesson_id: null, subject_id: selectedSubject.id,
+      })
+      if (e) { setError('Failed to save question.'); setSaving(false); return }
     } else if (selectedTopic) {
       const { error: e } = await supabase.from('quizzes').insert({
         ...payload, school_id: trackId, lesson_id: selectedTopic.id, subject_id: selectedTopic.subject_id,
@@ -149,6 +173,7 @@ export default function QuestionsTab({ trackId }: { trackId: string }) {
     setSaving(false)
     setForm(null)
     if (view === 'mock') load()
+    else if (view === 'subject' && selectedSubjectId) loadSubjectQuestions(selectedSubjectId)
     else if (selectedTopicId) loadTopicQuestions(selectedTopicId)
   }
 
@@ -157,6 +182,7 @@ export default function QuestionsTab({ trackId }: { trackId: string }) {
     const supabase = createClient()
     await supabase.from('quizzes').delete().eq('id', q.id)
     if (view === 'mock') load()
+    else if (view === 'subject' && selectedSubjectId) loadSubjectQuestions(selectedSubjectId)
     else if (selectedTopicId) loadTopicQuestions(selectedTopicId)
   }
 
@@ -210,7 +236,7 @@ export default function QuestionsTab({ trackId }: { trackId: string }) {
             const isOpen = openKind === kind
             const check = kind === 'practice' ? checkPracticeSize(practiceCounts.easy, practiceCounts.medium, practiceCounts.hard) : null
             return (
-              <AdminCard key={kind} className="p-0! overflow-hidden">
+              <AdminCard key={kind} className="!p-0 overflow-hidden">
                 <button onClick={() => setOpenKind(isOpen ? null : kind)} className="w-full flex items-center justify-between px-5 py-4 text-left">
                   <div className="flex items-center gap-2">
                     <ChevronRight size={16} className={`text-admin-muted transition-transform ${isOpen ? 'rotate-90' : ''}`} />
@@ -240,15 +266,42 @@ export default function QuestionsTab({ trackId }: { trackId: string }) {
     )
   }
 
+  // ── Subject-wide test for one subject ("finish all topics, take a quiz") ──
+  if (view === 'subject' && selectedSubject) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
+          <button onClick={() => { setView('topics') }} className="text-admin-muted hover:text-white">{selectedSubject.name}</button>
+          <ChevronRight size={14} className="text-slate-500" />
+          <span className="text-white font-semibold">Subject Test</span>
+        </div>
+        {error && <ErrorBanner message={error} />}
+        <div className="flex justify-end mb-3">
+          <AdminButton onClick={() => setForm(emptyForm('practice'))}><Plus size={14} /> Add question</AdminButton>
+        </div>
+        <QuestionList
+          questions={questions.filter(q => q.kind !== null)}
+          onEdit={openEdit}
+          onDelete={deleteQuestion}
+          emptyNote="No Subject Test questions yet. Students see this quiz once they finish every topic in this subject."
+        />
+        {form && <QuestionModal form={form} setForm={setForm} saving={saving} onCancel={() => setForm(null)} onSave={saveQuestion} showDifficulty={form.kind === 'practice'} />}
+      </div>
+    )
+  }
+
   // ── One subject's topics ────────────────────────────────
   if (selectedSubject) {
     const list = topicsFor(selectedSubject.id)
     return (
       <div>
-        <div className="flex items-center gap-2 text-sm mb-4">
-          <button onClick={() => setSelectedSubjectId(null)} className="text-admin-muted hover:text-white">Subjects</button>
-          <ChevronRight size={14} className="text-slate-500" />
-          <span className="text-white font-semibold">{selectedSubject.name}</span>
+        <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+          <div className="flex items-center gap-2 text-sm">
+            <button onClick={() => setSelectedSubjectId(null)} className="text-admin-muted hover:text-white">Subjects</button>
+            <ChevronRight size={14} className="text-slate-500" />
+            <span className="text-white font-semibold">{selectedSubject.name}</span>
+          </div>
+          <AdminButton variant="ghost" onClick={() => setView('subject')}>Subject Test</AdminButton>
         </div>
         {list.length === 0 ? (
           <EmptyState title="No topics in this subject yet" note="Add topics in the Subjects & Topics tab first." />
@@ -280,8 +333,8 @@ export default function QuestionsTab({ trackId }: { trackId: string }) {
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
           {subjects.map(s => (
-            <button key={s.id} onClick={() => setSelectedSubjectId(s.id)} className="text-left">
-              <AdminCard className="p-4! hover:border-admin-accent/50">
+            <button key={s.id} onClick={() => { setView('topics'); setSelectedSubjectId(s.id) }} className="text-left">
+              <AdminCard className="!p-4 hover:border-admin-accent/50">
                 <p className="text-white font-bold">{s.name}</p>
                 <p className="text-xs text-admin-muted mt-0.5">{topicsFor(s.id).length} topics</p>
               </AdminCard>
